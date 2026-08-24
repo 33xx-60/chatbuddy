@@ -188,8 +188,62 @@ mark{background:rgba(255,200,60,.35);color:inherit;padding:0 2px;border-radius:3
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--panel-solid);color:var(--text);padding:12px 22px;border-radius:30px;box-shadow:var(--shadow);border:1px solid var(--border);font-size:14px;z-index:200}
 @media(max-width:768px){#sidebar{width:220px}.message-area,.composer{padding-left:14px;padding-right:14px}.msg-body{max-width:82%}}
 </style>
+/* ===== 登录页面 ===== */
+#loginPage{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 800px at 20% -10%,rgba(124,108,255,.28),transparent 60%),radial-gradient(1000px 700px at 110% 110%,rgba(255,107,157,.20),transparent 55%),#12121c;background-attachment:fixed}
+#loginPage .login-box{width:100%;max-width:400px;background:var(--panel-solid);border:1px solid var(--border);border-radius:20px;padding:32px 28px;box-shadow:var(--shadow);animation:pop .3s ease}
+#loginPage .login-logo{text-align:center;font-size:28px;margin-bottom:4px}
+#loginPage h2{text-align:center;font-size:22px;margin-bottom:4px}
+#loginPage .login-sub{text-align:center;color:var(--text-dim);font-size:13px;margin-bottom:24px}
+#loginPage .field{margin-bottom:14px}
+#loginPage .field label{display:block;font-size:13px;color:var(--text-dim);margin-bottom:4px}
+#loginPage .login-err{color:var(--danger);font-size:12px;text-align:center;min-height:20px;margin-bottom:8px}
+#loginPage .login-actions{display:flex;gap:10px;margin-top:4px}
+#loginPage .login-actions button{flex:1;padding:11px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;border:none}
+#loginPage .btn-login{background:var(--accent);color:#fff}
+#loginPage .btn-login:hover{filter:brightness(1.12)}
+#loginPage .btn-reg-switch{background:var(--border);color:var(--text)}
+#loginPage .login-foot{text-align:center;margin-top:14px;font-size:13px;color:var(--text-faint)}
+#loginPage .login-foot a{color:var(--accent);cursor:pointer;text-decoration:none}
+#loginPage .login-foot a:hover{text-decoration:underline}
+#loginPage .login-success{display:none;text-align:center;padding:20px}
+#loginPage .login-success .big-emoji{font-size:48px;margin-bottom:12px}
+</style>
 </head>
 <body>
+<!-- 登录页面 -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">💬</div>
+    <h2>无聊聊天助手</h2>
+    <div class="login-sub" id="loginSub">登录后使用你的聊天伙伴</div>
+    <div id="loginForm">
+      <div class="field"><label>用户名</label><input id="loginUser" placeholder="输入用户名" autocomplete="username"></div>
+      <div class="field"><label>密码</label><input id="loginPass" type="password" placeholder="输入密码" autocomplete="current-password"></div>
+      <div class="login-err" id="loginErr"></div>
+      <div class="login-actions">
+        <button class="btn-login" id="btnLogin">登 录</button>
+        <button class="btn-reg-switch" id="btnSwitchReg">注册</button>
+      </div>
+      <div class="login-foot" id="loginFoot">还没有账号？<a id="linkSwitchReg">去注册</a></div>
+    </div>
+    <div id="loginRegForm" style="display:none">
+      <div class="field"><label>用户名</label><input id="regUser" placeholder="设置用户名（唯一）" autocomplete="username"></div>
+      <div class="field"><label>密码</label><input id="regPass" type="password" placeholder="设置密码" autocomplete="new-password"></div>
+      <div class="field"><label>确认密码</label><input id="regPass2" type="password" placeholder="再次输入密码" autocomplete="new-password"></div>
+      <div class="login-err" id="regErr"></div>
+      <div class="login-actions">
+        <button class="btn-login" id="btnRegister">注 册</button>
+        <button class="btn-reg-switch" id="btnSwitchLogin">返回登录</button>
+      </div>
+      <div class="login-foot">已有账号？<a id="linkSwitchLogin">去登录</a></div>
+    </div>
+    <div id="loginSuccess" class="login-success">
+      <div class="big-emoji">🎉</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:6px" id="welcomeMsg">欢迎回来！</div>
+      <div style="font-size:13px;color:var(--text-dim)">正在加载你的聊天伙伴…</div>
+    </div>
+  </div>
+</div>
 <div id="app" class="layout-sidebar">
   <aside id="sidebar">
     <div class="sidebar-head">
@@ -455,7 +509,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const fmtTime=ts=>{const d=new Date(ts);return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
 const fmtDate=ts=>{const d=new Date(ts),n=new Date(),y=d.getFullYear(),m=d.getMonth(),day=d.getDate();if(y===n.getFullYear()&&m===n.getMonth()&&day===n.getDate())return'今天';const ye=new Date(n);ye.setDate(n.getDate()-1);if(y===ye.getFullYear()&&m===ye.getMonth()&&day===ye.getDate())return'昨天';return`${m+1}月${day}日`};
 function toast(msg,ms=2600){const el=$('#toast');el.textContent=msg;el.classList.remove('hidden');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.add('hidden'),ms)}
-function save(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem('chatbuddy_store_v2',JSON.stringify(store))}catch(e){toast('保存失败：存储空间不足')}},500)}
+function save(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{if(currentAccount)saveCurrentData();else localStorage.setItem('chatbuddy_store_v2',JSON.stringify(store))}catch(e){toast('保存失败：存储空间不足')}},500)}
 function highlight(text,kw){if(!kw)return esc(text);const i=text.toLowerCase().indexOf(kw.toLowerCase());if(i<0)return esc(text);return esc(text.slice(0,i))+'<mark>'+esc(text.slice(i,i+kw.length))+'</mark>'+esc(text.slice(i+kw.length))}
 function avatarHtml(c){if(!c)return'🙂';const img=c.avatarImage||c.userAvatar||'';return img?`<img src="${img}" alt="">`:(c.avatar||'🙂')}
 function readImageAsDataURL(file,maxW,cb){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,maxW/img.width),cv=document.createElement('canvas');cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);cb(cv.toDataURL('image/jpeg',.85))};img.src=e.target.result};r.readAsDataURL(file)}
@@ -534,7 +588,7 @@ async function localChat(messages,onDelta){
  const step=4;for(let i=0;i<genText.length;i+=step){full+=genText.slice(i,i+step);onDelta(full);await new Promise(r=>setTimeout(r,15))}
  return full;
 }
-function updateLocalStatus(s){const el=$('#localModelStatus');if(el)el.textContent=s;$('#engineBadge').textContent=store.settings.engine==='local'?('🧠 '+s):('☁️ 在线API')}
+function updateLocalStatus(s){const el=$('#localModelStatus');if(el)el.textContent=s;$('#engineBadge').textContent=store.settings.engine==='local'?('🧠 '+s):('☁️ 在线API');if(s==='本地模型未加载'){$('#engineBadge').style.cursor='pointer';$('#engineBadge').title='点击去设置免费在线 API（无需下载模型）';const tip=$('.composer-tip');if(tip)tip.textContent='💡 还没配置模型，点底部「🧠 本地模型未加载」设置免费在线 API'}}
 async function genChat({message=null,auto=false}={}){
  const c=currentCompanion();if(!c||sending)return;sending=true;
  $('#btnSend').disabled=true;$('#inputBox').disabled=true;
@@ -768,6 +822,23 @@ function download(text,filename,mime){const a=document.createElement('a');a.href
 function exportJson(){download(JSON.stringify(store,null,2),`聊天助手备份_${Date.now()}.json`,'application/json;charset=utf-8')}
 function handleBgImage(file){if(!file)return;const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{const maxW=1920,sc=Math.min(1,maxW/img.width),cv=document.createElement('canvas');cv.width=img.width*sc;cv.height=img.height*sc;cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);store.settings.theme.bgImage=cv.toDataURL('image/jpeg',.82);store.settings.theme.bgStyle='image';setSeg('tBgStyle','image');applyTheme(store.settings.theme);save();toast('背景已更新')};img.src=e.target.result};r.readAsDataURL(file)}
 
+// ================= 账号系统 =================
+let accounts=null,currentAccount=null;
+function getAccounts(){if(!accounts){const s=localStorage.getItem('chatbuddy_accounts');accounts=s?JSON.parse(s):{}};return accounts}
+function saveAccounts(){localStorage.setItem('chatbuddy_accounts',JSON.stringify(getAccounts()))}
+function register(username,password){if(!username||!password)throw new Error('用户名和密码不能为空');const u=username.trim().toLowerCase();if(getAccounts()[u])throw new Error('用户名已存在，请换一个');getAccounts()[u]={password,createdAt:Date.now()};saveAccounts();// 迁移旧数据const oldData=localStorage.getItem('chatbuddy_store_v2');if(oldData){localStorage.setItem(`chatbuddy_store_${u}`,oldData);localStorage.removeItem('chatbuddy_store_v2')}toast('注册成功，请登录');switchToLogin();}
+function login(username,password){const u=username.trim().toLowerCase();const acc=getAccounts()[u];if(!acc)throw new Error('用户不存在');if(acc.password!==password)throw new Error('密码错误');currentAccount=username;localStorage.setItem('chatbuddy_currentAccount',username);$('#welcomeMsg').textContent=`欢迎回来，${username}！`;$('#loginSuccess').style.display='block';setTimeout(()=>{$('#loginPage').style.display='none';afterLoginLoad();},600);}
+function logout(){if(confirm('确定退出当前账号吗？')){currentAccount=null;localStorage.removeItem('chatbuddy_currentAccount');location.reload()}}
+function getCurrentDataKey(){return `chatbuddy_store_${currentAccount.trim().toLowerCase()}`}
+function getCurrentUserData(){const key=getCurrentDataKey();const data=localStorage.getItem(key);return data?JSON.parse(data):defaultStore()}
+function saveCurrentData(){if(!currentAccount)return;const key=getCurrentDataKey();localStorage.setItem(key,JSON.stringify(store))}
+function afterLoginLoad(){const newStore=getCurrentUserData();if(newStore&&newStore.companions){store=Object.assign(defaultStore(),newStore)}else{store=defaultStore()}store=Object.assign(defaultStore(),store);if(!store.settings.theme.bgGradient)store.settings.theme.bgGradient=GRADIENTS[0].value;buildStatic();applyTheme(store.settings.theme);renderCompanionList();renderUserCard();if(store.companions.length){const last=store.companions.find(c=>c.id===store.settings.activeCompanionId)||store.companions[0];switchTo(last.id)}else showEmptyState();bindEvents();renderQuickPhrases();ttsEnabled=store.settings.tts!==false;showDailyQuote();updateLocalStatus(store.settings.engine==='local'?(localPipe?'✅ 本地模型已就绪':'本地模型未加载'):'☁️ 在线API');checkOfflineGreetings();startActiveTimer();lastActivityAt=Date.now();}
+// 登录页面UI切换
+function switchToLogin(){$('#loginForm').style.display='block';$('#loginRegForm').style.display='none';$('#loginErr').textContent='';$('#loginUser').focus()}
+function switchToRegister(){$('#loginForm').style.display='none';$('#loginRegForm').style.display='block';$('#regErr').textContent='';$('#regUser').focus()}
+// 绑定登录事件
+function bindAuthEvents(){$('#btnSwitchReg').addEventListener('click',switchToRegister);$('#btnSwitchLogin').addEventListener('click',switchToLogin);$('#linkSwitchReg').addEventListener('click',e=>{e.preventDefault();switchToRegister()});$('#linkSwitchLogin').addEventListener('click',e=>{e.preventDefault();switchToLogin()});$('#btnRegister').addEventListener('click',()=>{const user=$('#regUser').value.trim(),pass=$('#regPass').value,pass2=$('#regPass2').value.trim();if(!user){$('#regErr').textContent='请输入用户名';return}if(pass.length<4){$('#regErr').textContent='密码至少4位';return}if(pass!==pass2){$('#regErr').textContent='两次密码不一致';return}try{register(user,pass);$('#regUser').value='';$('#regPass').value='';$('#regPass2').value=''}catch(e){$('#regErr').textContent=e.message}});$('#btnLogin').addEventListener('click',()=>{const user=$('#loginUser').value.trim(),pass=$('#loginPass').value;if(!user||!pass){$('#loginErr').textContent='请输入用户名和密码';return}try{login(user,pass)}catch(e){$('#loginErr').textContent=e.message}});['keydown'].forEach(ev=>{$('#loginUser').addEventListener(ev,e=>{if(e.key==='Enter')$('#loginPass').focus()});$('#loginPass').addEventListener(ev,e=>{if(e.key==='Enter')$('#btnLogin').click()});$('#regUser').addEventListener(ev,e=>{if(e.key==='Enter')$('#regPass').focus()});$('#regPass').addEventListener(ev,e=>{if(e.key==='Enter')$('#regPass2').focus()});$('#regPass2').addEventListener(ev,e=>{if(e.key==='Enter')$('#btnRegister').click()})});// 初始显示登录switchToLogin();// 检查自动登录const saved=localStorage.getItem('chatbuddy_currentAccount');if(saved&&getAccounts()[saved.trim().toLowerCase()]){currentAccount=saved;$('#loginSuccess').style.display='block';$('#welcomeMsg').textContent=`欢迎回来，${currentAccount}！`;setTimeout(()=>{$('#loginPage').style.display='none';afterLoginLoad();},400)}else{// 有账号的话直接显示登录，没有提示自动迁移if(Object.keys(getAccounts()).length===0&&localStorage.getItem('chatbuddy_store_v2')){// 迁移旧数据到第一个用户（如果用户注册）$('#loginSub').textContent='已有旧数据？注册后会自动迁移到你的账号'}}// 添加登出按钮在侧边栏if(!$('#btnLogout')){const btn=document.createElement('button');btn.className='icon-btn';btn.id='btnLogout';btn.title='退出账号';btn.textContent='🚪';btn.style.marginLeft='4px';btn.addEventListener('click',logout);$('.sidebar-head').appendChild(btn)}}
+
 // ================= 初始化 =================
 function buildStatic(){
  const av=$('#avatarPicker');av.innerHTML=AVATARS.map(a=>`<div class="avatar-item" data-v="${a}">${a}</div>`).join('');
@@ -825,6 +896,7 @@ function bindEvents(){
  $('#sAutoGreet').addEventListener('change',()=>{store.settings.autoGreet=$('#sAutoGreet').checked;save()});
  $('#sTts').addEventListener('change',()=>{ttsEnabled=$('#sTts').checked});
  $('#btnCheckOffline').addEventListener('click',async()=>{toast('正在检查离线补发…');await checkOfflineGreetings();toast('检查完成')});
+	 $('#engineBadge').addEventListener('click',()=>{if(store.settings.engine==='local'&&!localPipe)openSettings('tabEngine');else openSettings('tabEngine')});
  $('#btnSimulate').addEventListener('click',()=>{if(!currentCompanion()){toast('先选一个伙伴');return}genChat({auto:true})});
  // 输入
  const input=$('#inputBox');
@@ -846,16 +918,25 @@ function bindEvents(){
  $$('.modal-mask').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.add('hidden')}));
 }
 function init(){
- try{store=JSON.parse(localStorage.getItem('chatbuddy_store_v2'))||defaultStore()}catch(e){store=defaultStore()}
- store=Object.assign(defaultStore(),store);
- if(!store.settings.theme.bgGradient)store.settings.theme.bgGradient=GRADIENTS[0].value;
- buildStatic();applyTheme(store.settings.theme);renderCompanionList();renderUserCard();
- if(store.companions.length){const last=store.companions.find(c=>c.id===store.settings.activeCompanionId)||store.companions[0];switchTo(last.id)}else showEmptyState();
- bindEvents();renderQuickPhrases();ttsEnabled=store.settings.tts!==false;showDailyQuote();
- updateLocalStatus(store.settings.engine==='local'?'本地免费模型':'在线 API');
- checkOfflineGreetings();startActiveTimer();lastActivityAt=Date.now();
-}
-document.addEventListener('DOMContentLoaded',init);
+	 try{store=JSON.parse(localStorage.getItem('chatbuddy_store_v2'))||defaultStore()}catch(e){store=defaultStore()}
+	 store=Object.assign(defaultStore(),store);
+	 if(!store.settings.theme.bgGradient)store.settings.theme.bgGradient=GRADIENTS[0].value;
+	 buildStatic();applyTheme(store.settings.theme);renderCompanionList();renderUserCard();
+	 if(store.companions.length){const last=store.companions.find(c=>c.id===store.settings.activeCompanionId)||store.companions[0];switchTo(last.id)}else showEmptyState();
+	 bindEvents();renderQuickPhrases();ttsEnabled=store.settings.tts!==false;showDailyQuote();
+	 updateLocalStatus(store.settings.engine==='local'?'本地免费模型':'在线 API');
+	 checkOfflineGreetings();startActiveTimer();lastActivityAt=Date.now();
+	}
+	// 启动：先初始化登录系统，再决定是否显示主界面
+	document.addEventListener('DOMContentLoaded',()=>{
+	 // 先加载默认store（用于登录页面的样式等）
+	 try{store=JSON.parse(localStorage.getItem('chatbuddy_store_v2'))||defaultStore()}catch(e){store=defaultStore()}
+	 store=Object.assign(defaultStore(),store);
+	 buildStatic();
+	 bindAuthEvents();
+	 // 如果已登录，bindAuthEvents会自动调用afterLoginLoad
+	 // 如果未登录，登录页面会显示
+	});
 </script>
 </body>
 </html>
