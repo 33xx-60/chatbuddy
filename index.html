@@ -282,7 +282,6 @@ mark{background:rgba(255,200,60,.35);color:inherit;padding:0 2px;border-radius:3
         <button class="tab" data-tab="tabEngine">🤖 大模型</button>
         <button class="tab" data-tab="tabTheme">🎨 页面风格</button>
         <button class="tab" data-tab="tabAuto">🔁 自动说话</button>
-        <button class="tab" data-tab="tabShare">📤 分享部署</button>
         <button class="tab" data-tab="tabData">📦 数据</button>
       </div>
       <div class="tab-pane" id="tabProfile">
@@ -358,15 +357,7 @@ mark{background:rgba(255,200,60,.35);color:inherit;padding:0 2px;border-radius:3
         <button class="btn-plain" id="btnCheckOffline">🕐 立即检查离线补发</button>
         <button class="btn-plain" id="btnSimulate">🔁 模拟 TA 主动找你</button>
       </div>
-      <div class="tab-pane hidden" id="tabShare">
-        <div class="hint-box">📣 <b>把聊天助手分享给朋友</b>：本网页是单文件纯静态，部署到免费托管后就是固定网址，把网址发给任何人就能用。每个人在各自浏览器里保存自己的资料和聊天，互不干扰。</div>
-        <div class="share-steps">
-          <div class="share-step"><b>1. Netlify Drop（最快，30 秒）</b><br>打开 <code>app.netlify.com/drop</code>，把本网页文件拖进去，立刻得到 <code>xxx.netlify.app</code> 网址，复制发给朋友。</div>
-          <div class="share-step"><b>2. GitHub Pages（免费永久）</b><br>新建仓库 → 上传本文件 → Settings → Pages → 选分支部署 → 得到 <code>你的用户名.github.io/仓库名</code> 网址。</div>
-          <div class="share-step"><b>3. Vercel / Cloudflare Pages / Gitee Pages</b><br>登录后新建项目上传单文件，同样免费得网址。</div>
-        </div>
-        <button class="btn-plain" id="btnCopyShareTip">📋 复制部署步骤</button>
-      </div>
+      
       <div class="tab-pane hidden" id="tabData">
         <div class="form-grid two">
           <button class="btn-plain" id="btnExportAll">📤 导出记录 TXT</button>
@@ -798,7 +789,7 @@ function bindEvents(){
  $('#btnPickUserAvatar').addEventListener('click',()=>$('#uAvatarFile').click());
  $('#uAvatarFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;readImageAsDataURL(f,256,url=>{getUser().avatar=url;loadProfileForm();renderUserCard();save();toast('头像已更新')});e.target.value=''});
  $('#btnClearUserAvatar').addEventListener('click',()=>{getUser().avatar='';loadProfileForm();renderUserCard();save();toast('已清除头像')});
- $('#btnCopyShareTip').addEventListener('click',()=>{const t='无聊聊天助手分享步骤：\n1. 打开 app.netlify.com/drop\n2. 把网页文件拖进去\n3. 复制得到的网址发给朋友';if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>toast('已复制部署步骤 📋'),()=>toast(t,5000));else prompt('复制这段部署步骤：',t)});
+
  $('#btnPickAvatarFile').addEventListener('click',()=>$('#fAvatarFile').click());
  $('#fAvatarFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;readImageAsDataURL(f,256,url=>{pendingAvatarImage=url;const pk=$('#avatarPicker');let tg=pk.querySelector('.avatar-item.custom-avatar');if(!tg){tg=document.createElement('div');tg.className='avatar-item custom-avatar';pk.prepend(tg)}tg.innerHTML=`<img src="${url}" alt="">`;tg.classList.add('active');$$('#avatarPicker .avatar-item:not(.custom-avatar)').forEach(x=>x.classList.remove('active'));$('#btnClearAvatar').classList.remove('hidden');toast('头像已添加，保存后生效')});e.target.value=''});
  $('#btnClearAvatar').addEventListener('click',()=>{pendingAvatarImage='';const pk=$('#avatarPicker');const tg=pk.querySelector('.avatar-item.custom-avatar');if(tg)tg.remove();$$('#avatarPicker .avatar-item').forEach(x=>x.classList.remove('active'));const f=pk.querySelector('.avatar-item');if(f)f.classList.add('active');$('#btnClearAvatar').classList.add('hidden');toast('已清除自定义头像')});
