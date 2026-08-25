@@ -361,11 +361,11 @@ mark{background:rgba(255,200,60,.35);color:inherit;padding:0 2px;border-radius:3
             <button data-v="online">☁️ 在线 API</button>
           </div>
         </label>
-        <label class="field" id="localModelField"><span>本地模型（越大越聪明，越占内存）</span>
+        <label class="field" id="localModelField"><span>本地模型（越小越流畅，越大越聪明越卡）</span>
           <select id="sLocalModel">
-            <option value="onnx-community/Qwen2.5-0.5B-Instruct">Qwen2.5-0.5B（快，约500MB）</option>
-            <option value="onnx-community/Qwen2.5-1.5B-Instruct">Qwen2.5-1.5B（推荐，约1.1GB）</option>
-            <option value="onnx-community/Qwen2.5-3B-Instruct">Qwen2.5-3B（聪明，约2GB）</option>
+            <option value="onnx-community/Qwen2.5-0.5B-Instruct">Qwen2.5-0.5B（流畅·推荐，约500MB）</option>
+            <option value="onnx-community/Qwen2.5-1.5B-Instruct">Qwen2.5-1.5B（均衡，约1.1GB）</option>
+            <option value="onnx-community/Qwen2.5-3B-Instruct">Qwen2.5-3B（聪明但慢，约2GB）</option>
           </select>
           <small class="field-tip" id="localModelStatus"></small>
         </label>
@@ -492,12 +492,12 @@ const THEMES=[
 const STYLES=[{id:'romantic',name:'热恋甜腻',prompt:'你说话非常甜腻宠溺，爱撒娇，经常说情话，称呼亲密，温柔黏人。'},{id:'warm',name:'暖心治愈',prompt:'你温柔体贴，善于倾听和安慰，像冬日里的一杯热奶茶。'},{id:'friend',name:'知心朋友',prompt:'你就像认识多年的老友，轻松随意，什么都能聊，自然不做作。'},{id:'buddy',name:'死党损友',prompt:'你是对方的死党损友，爱开玩笑互相调侃，又很讲义气。'},{id:'mentor',name:'人生导师',prompt:'你理性睿智，善于分析给建议，鼓励对方成长。'},{id:'funny',name:'幽默段子手',prompt:'你幽默风趣，擅长讲段子玩梗，总能让对方笑出来。'},{id:'cool',name:'高冷毒舌',prompt:'你话不多高冷傲娇，偶尔毒舌但内心在意，回复简洁却扎心。'},{id:'cute',name:'软萌小可爱',prompt:'你非常可爱软萌，喜欢卖萌撒娇，奶声奶气。'},{id:'custom',name:'完全自定义',prompt:''}];
 const RELS=[{id:'sweetheart',name:'恋人'},{id:'friend',name:'普通朋友'},{id:'buddy',name:'好朋友'},{id:'family',name:'家人'},{id:'mentor',name:'师长'},{id:'custom',name:'自定义'}];
 const PROVIDERS=[
- {id:'groq',name:'🆓 Groq（免费·超快）',base:'https://api.groq.com/openai/v1',model:'llama-3.3-70b-versatile',tip:'完全免费：30次/分钟、1.4万次/天，浏览器直连',models:['llama-3.3-70b-versatile','llama-3.1-8b-instant','openai/gpt-oss-120b','qwen/qwen3-32b','kimi-k2-instruct']},
- {id:'openrouter',name:'🆓 OpenRouter（免费模型）',base:'https://openrouter.ai/api/v1',model:'meta-llama/llama-3.3-70b-instruct:free',tip:'29+ 个 :free 免费模型，免费账号每天 50 次',models:['meta-llama/llama-3.3-70b-instruct:free','deepseek/deepseek-chat-v3-0324:free','qwen/qwen3-32b:free','meta-llama/llama-4-scout:free']},
- {id:'zhipu',name:'🆓 智谱 GLM（Flash 免费）',base:'https://open.bigmodel.cn/api/paas/v4',model:'glm-4-flash',tip:'GLM-4-Flash 免费永久。⚠️ 需配 CORS 代理（浏览器直连会被拦截），或直接用下面的 Groq/OpenRouter 更省事',models:['glm-4-flash','glm-4.7-flash','glm-4-air','glm-4-plus']},
- {id:'siliconflow',name:'🆓 硅基流动（免费额度）',base:'https://api.siliconflow.cn/v1',model:'Qwen/Qwen2.5-7B-Instruct',tip:'注册送 2000 万 Token，9B 以下永久免费。⚠️ 需配 CORS 代理或先用 Groq',models:['Qwen/Qwen2.5-7B-Instruct','Qwen/Qwen3-8B','deepseek-ai/DeepSeek-V3']},
- {id:'deepseek',name:'DeepSeek',base:'https://api.deepseek.com/v1',model:'deepseek-chat',tip:'性价比高。⚠️ 需配 CORS 代理',models:['deepseek-chat','deepseek-reasoner']},
- {id:'qwen',name:'通义千问',base:'https://dashscope.aliyuncs.com/compatible-mode/v1',model:'qwen-plus',tip:'新用户送 1000 万 Token。⚠️ 需配 CORS 代理',models:['qwen-plus','qwen-max','qwen-turbo']},
+ {id:'groq',name:'🆓 Groq（免费·超快）',base:'https://api.groq.com/openai/v1',model:'llama-3.3-70b-versatile',tip:'完全免费：30次/分钟、1.4万次/天，浏览器直连',models:['llama-3.3-70b-versatile','llama-3.1-8b-instant']},
+ {id:'openrouter',name:'🆓 OpenRouter（免费模型）',base:'https://openrouter.ai/api/v1',model:'meta-llama/llama-3.3-70b-instruct:free',tip:'29+ 个 :free 免费模型，免费账号每天 50 次',models:['meta-llama/llama-3.3-70b-instruct:free','deepseek/deepseek-chat-v3-0324:free']},
+ {id:'zhipu',name:'🆓 智谱 GLM（Flash 免费）',base:'https://open.bigmodel.cn/api/paas/v4',model:'glm-4.7-flash',tip:'GLM 免费系列。⚠️ 浏览器直连会被 CORS 拦截，需配代理，或用 Groq/OpenRouter 更省事',models:['glm-4.7-flash','glm-4-flash']},
+ {id:'siliconflow',name:'🆓 硅基流动（免费额度）',base:'https://api.siliconflow.cn/v1',model:'Qwen/Qwen3-8B',tip:'注册送 2000 万 Token，9B 以下永久免费。⚠️ 需配代理或先用 Groq',models:['Qwen/Qwen3-8B','Qwen/Qwen2.5-7B-Instruct']},
+ {id:'deepseek',name:'DeepSeek',base:'https://api.deepseek.com/v1',model:'deepseek-chat',tip:'性价比高。⚠️ 需配 CORS 代理',models:['deepseek-chat']},
+ {id:'qwen',name:'通义千问',base:'https://dashscope.aliyuncs.com/compatible-mode/v1',model:'qwen-plus',tip:'新用户送 1000 万 Token。⚠️ 需配 CORS 代理',models:['qwen-plus']},
  {id:'custom',name:'自定义',base:'',model:'',tip:'任意 OpenAI 兼容接口',models:[]}];
 const QUOTES=['今天也要开开心心的呀 ✨','无聊的时候，正是想你的好时候 💭','如果快乐太难，那我祝你平安，顺便想你 🍀','你不在的时候，我把月亮看了好多遍 🌙','天气这么好，适合想我一下下 ☀️','你一来，这里的空气都变甜了 🍬','世界很大，但我的聊天框只留给你 💌','听说发呆是大脑的度假，我陪你去 🏖️'];
 const FALLBACK_IDEAS=['聊聊最近让你开心的小事吧','如果明天完全自由，你想做什么？','最近单曲循环的一首歌是什么？','说一个你想去但还没去的地方','最近有什么想吐槽的吗？','假如我们有超能力，你最想要哪种？'];
@@ -601,7 +601,7 @@ async function localChat(messages,onDelta){
    for(const host of hosts){
     try{
      env.remoteHost=host;
-     localPipe=await pipeline('text-generation',store.settings.localModel,{dtype:'q8',max_length:2048,do_sample:true,temperature:Number(store.settings.llm.temperature??0.9)});
+     localPipe=await pipeline('text-generation',store.settings.localModel,{dtype:'q8',max_length:1024,do_sample:true,temperature:Number(store.settings.llm.temperature??0.9)});
      loaded=true;break;
     }catch(e){lastErr=e}
    }
@@ -611,16 +611,18 @@ async function localChat(messages,onDelta){
   updateLocalStatus('✅ 本地模型已就绪');
  }
  const prompt=buildLocalPrompt(messages);
- const out=await localPipe(prompt,{max_new_tokens:400,do_sample:true,temperature:Number(store.settings.llm.temperature??0.9)});
+ const out=await localPipe(prompt,{max_new_tokens:250,do_sample:true,temperature:Number(store.settings.llm.temperature??0.9)});
  // 提取生成文本
  const raw=typeof out==='string'?out:(out&&out[0]&&(out[0].generated_text||out[0].text))||'';
  // 去掉提示词前缀，只保留模型新生成的部分
  let genText=raw;
  if(genText.startsWith(prompt))genText=genText.slice(prompt.length).trim();
  if(!genText)genText=raw.trim();
- // 流式模拟：分段吐字
+ // 空回复兜底：本地小模型偶尔会生成空文本，给个自然的话术接住，避免"不回复"
+ if(!genText)genText='（我刚才走神了没接上话……你再说一遍呗？我这次一定好好听。）';
+ // 流式模拟：分段吐字（加快节奏，减少卡顿感）
  let full='';
- const step=4;for(let i=0;i<genText.length;i+=step){full+=genText.slice(i,i+step);onDelta(full);await new Promise(r=>setTimeout(r,15))}
+ const step=6;for(let i=0;i<genText.length;i+=step){full+=genText.slice(i,i+step);onDelta(full);await new Promise(r=>setTimeout(r,10))}
  return full;
 }
 function updateLocalStatus(s){const el=$('#localModelStatus');if(el)el.textContent=s;$('#engineBadge').textContent=store.settings.engine==='local'?('🧠 '+s):('☁️ 在线API');if(s==='本地模型未加载'){$('#engineBadge').style.cursor='pointer';$('#engineBadge').title='点击去设置免费在线 API（无需下载模型）';const tip=$('.composer-tip');if(tip)tip.textContent='💡 还没配置模型，点底部「🧠 本地模型未加载」设置免费在线 API'}}
@@ -646,7 +648,7 @@ async function genChat({message=null,auto=false}={}){
   if(/API Key|填/.test(e.message))openSettings('tabEngine');
   sending=false;resetComposer();return;
  }
- if(!full.trim()){tempEl.remove();if(auto){sending=false;resetComposer();return}toast('收到空回复，请检查 API Key 和模型设置');sending=false;resetComposer();return}
+ if(!full.trim()){full='（我好像没听清你说什么……再说一遍好吗？）';bubbleEl.textContent=full;}
  const ts=Date.now();const realMsg={id:uid(),role:'assistant',content:full,ts,auto};
  c.messages.push(realMsg);
  bubbleEl.classList.remove('stream-cursor');bubbleEl.textContent=full;
