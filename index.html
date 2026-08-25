@@ -494,10 +494,10 @@ const RELS=[{id:'sweetheart',name:'恋人'},{id:'friend',name:'普通朋友'},{i
 const PROVIDERS=[
  {id:'groq',name:'🆓 Groq（免费·超快）',base:'https://api.groq.com/openai/v1',model:'llama-3.3-70b-versatile',tip:'完全免费：30次/分钟、1.4万次/天，浏览器直连',models:['llama-3.3-70b-versatile','llama-3.1-8b-instant','openai/gpt-oss-120b','qwen/qwen3-32b','kimi-k2-instruct']},
  {id:'openrouter',name:'🆓 OpenRouter（免费模型）',base:'https://openrouter.ai/api/v1',model:'meta-llama/llama-3.3-70b-instruct:free',tip:'29+ 个 :free 免费模型，免费账号每天 50 次',models:['meta-llama/llama-3.3-70b-instruct:free','deepseek/deepseek-chat-v3-0324:free','qwen/qwen3-32b:free','meta-llama/llama-4-scout:free']},
- {id:'zhipu',name:'🆓 智谱 GLM（Flash 免费）',base:'https://open.bigmodel.cn/api/paas/v4',model:'glm-4-flash',tip:'GLM-4-Flash 免费永久，国内直连（网页版可能遇跨域，可配 CORS 代理）',models:['glm-4-flash','glm-4.7-flash','glm-4-air','glm-4-plus']},
- {id:'siliconflow',name:'🆓 硅基流动（免费额度）',base:'https://api.siliconflow.cn/v1',model:'Qwen/Qwen2.5-7B-Instruct',tip:'注册送 2000 万 Token，9B 以下永久免费',models:['Qwen/Qwen2.5-7B-Instruct','Qwen/Qwen3-8B','deepseek-ai/DeepSeek-V3']},
- {id:'deepseek',name:'DeepSeek',base:'https://api.deepseek.com/v1',model:'deepseek-chat',tip:'性价比高',models:['deepseek-chat','deepseek-reasoner']},
- {id:'qwen',name:'通义千问',base:'https://dashscope.aliyuncs.com/compatible-mode/v1',model:'qwen-plus',tip:'新用户送 1000 万 Token',models:['qwen-plus','qwen-max','qwen-turbo']},
+ {id:'zhipu',name:'🆓 智谱 GLM（Flash 免费）',base:'https://open.bigmodel.cn/api/paas/v4',model:'glm-4-flash',tip:'GLM-4-Flash 免费永久。⚠️ 需配 CORS 代理（浏览器直连会被拦截），或直接用下面的 Groq/OpenRouter 更省事',models:['glm-4-flash','glm-4.7-flash','glm-4-air','glm-4-plus']},
+ {id:'siliconflow',name:'🆓 硅基流动（免费额度）',base:'https://api.siliconflow.cn/v1',model:'Qwen/Qwen2.5-7B-Instruct',tip:'注册送 2000 万 Token，9B 以下永久免费。⚠️ 需配 CORS 代理或先用 Groq',models:['Qwen/Qwen2.5-7B-Instruct','Qwen/Qwen3-8B','deepseek-ai/DeepSeek-V3']},
+ {id:'deepseek',name:'DeepSeek',base:'https://api.deepseek.com/v1',model:'deepseek-chat',tip:'性价比高。⚠️ 需配 CORS 代理',models:['deepseek-chat','deepseek-reasoner']},
+ {id:'qwen',name:'通义千问',base:'https://dashscope.aliyuncs.com/compatible-mode/v1',model:'qwen-plus',tip:'新用户送 1000 万 Token。⚠️ 需配 CORS 代理',models:['qwen-plus','qwen-max','qwen-turbo']},
  {id:'custom',name:'自定义',base:'',model:'',tip:'任意 OpenAI 兼容接口',models:[]}];
 const QUOTES=['今天也要开开心心的呀 ✨','无聊的时候，正是想你的好时候 💭','如果快乐太难，那我祝你平安，顺便想你 🍀','你不在的时候，我把月亮看了好多遍 🌙','天气这么好，适合想我一下下 ☀️','你一来，这里的空气都变甜了 🍬','世界很大，但我的聊天框只留给你 💌','听说发呆是大脑的度假，我陪你去 🏖️'];
 const FALLBACK_IDEAS=['聊聊最近让你开心的小事吧','如果明天完全自由，你想做什么？','最近单曲循环的一首歌是什么？','说一个你想去但还没去的地方','最近有什么想吐槽的吗？','假如我们有超能力，你最想要哪种？'];
@@ -555,7 +555,9 @@ async function onlineChat(messages,onDelta){
  if(!llm.apiKey)throw new Error('还没填 API Key，去设置里配置');
  const base=(llm.proxy||'')+(llm.base||'').replace(/\/+$/,'');
  if(!base)throw new Error('未配置 API 地址');
- const res=await fetch(base+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',...(llm.apiKey?{Authorization:'Bearer '+llm.apiKey}:{})},body:JSON.stringify({model:llm.model,messages,temperature:Number(llm.temperature??0.9),max_tokens:1200,stream:true})});
+ let res;
+ try{res=await fetch(base+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',...(llm.apiKey?{Authorization:'Bearer '+llm.apiKey}:{})},body:JSON.stringify({model:llm.model,messages,temperature:Number(llm.temperature??0.9),max_tokens:1200,stream:true})});}
+ catch(e){throw new Error('网络/跨域(CORS)失败：'+ (llm.proxy?'代理无效或网络问题':'浏览器直连被拦截，请在设置里填 CORS 代理，或改用 Groq/OpenRouter 等支持直连的服务'))}
  if(!res.ok){let t='';try{t=(await res.json()).error?.message||''}catch(e){t=await res.text()}throw new Error('接口返回 '+res.status+'：'+t.slice(0,120))}
  const reader=res.body.getReader(),dec=new TextDecoder();let full='',buf='';
  while(true){const{done,value}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});const evs=buf.split('\n\n');buf=evs.pop();
@@ -564,27 +566,59 @@ async function onlineChat(messages,onDelta){
 }
 async function getTF(){
  if(window.__tf)return window.__tf;
- const mod=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm');
- window.__tf={pipeline:mod.pipeline,env:mod.env};
- return window.__tf;
+ // 多个 CDN 备用，国内优先 fastly/gcore，避免单个 CDN 失效
+ const urls=[
+  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm',
+  'https://fastly.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm',
+  'https://gcore.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm',
+  'https://unpkg.com/@huggingface/transformers@3.7.2/+esm'
+ ];
+ let lastErr=null;
+ for(const url of urls){
+  try{const mod=await import(url);window.__tf={pipeline:mod.pipeline,env:mod.env};return window.__tf}
+  catch(e){lastErr=e}
+ }
+ throw lastErr||new Error('load failed');
+}
+function buildLocalPrompt(msgs){
+ return msgs.map(m=>{
+  const role=m.role==='user'?'用户':(m.role==='system'?'设定':'助手');
+  return `${role}：${m.content}`;
+ }).join('\n')+'\n助手：';
 }
 async function localChat(messages,onDelta){
  let tf;
- try{tf=await getTF()}catch(e){throw new Error('Transformers.js 加载失败，请检查网络后刷新页面')}
+ try{tf=await getTF()}catch(e){throw new Error('Transformers.js 加载失败（CDN 连不上），请检查网络后刷新页面，或改用在线 API')}
  if(!localPipe){
-  if(localLoading)throw new Error('模型正在加载中，请稍候');
-  localLoading=true;updateLocalStatus('正在下载/加载模型…（首次约 1GB，之后走缓存）');
+  if(localLoading)throw new Error('模型正在下载/加载中，请稍候再试');
+  localLoading=true;updateLocalStatus('正在下载/加载模型…（首次约 500MB，之后走缓存，请耐心等待）');
   try{
    const{pipeline,env}=tf;
    env.allowLocalModels=false;
-   env.remoteHost='https://hf-mirror.com';  // 国内镜像，加速模型下载
-   localPipe=await pipeline('text-generation',store.settings.localModel,{dtype:'q8',max_length:2048,do_sample:true,temperature:Number(store.settings.llm.temperature??0.9)});
-  }finally{localLoading=false}
+   // 国内镜像优先，失败自动切官方源重试
+   const hosts=['https://hf-mirror.com','https://huggingface.co'];
+   let lastErr=null,loaded=false;
+   for(const host of hosts){
+    try{
+     env.remoteHost=host;
+     localPipe=await pipeline('text-generation',store.settings.localModel,{dtype:'q8',max_length:2048,do_sample:true,temperature:Number(store.settings.llm.temperature??0.9)});
+     loaded=true;break;
+    }catch(e){lastErr=e}
+   }
+   if(!loaded)throw lastErr||new Error('模型下载失败');
+  }catch(e){updateLocalStatus('本地模型加载失败');throw new Error('本地模型下载失败（无法连接模型源）：'+(e.message||'网络错误').slice(0,60)+'，请检查网络后刷新，或改用在线 API')}
+  finally{localLoading=false}
   updateLocalStatus('✅ 本地模型已就绪');
  }
- const text=localPipe(messages,{max_new_tokens:400,do_sample:true,temperature:Number(store.settings.llm.temperature??0.9)});
+ const prompt=buildLocalPrompt(messages);
+ const out=await localPipe(prompt,{max_new_tokens:400,do_sample:true,temperature:Number(store.settings.llm.temperature??0.9)});
+ // 提取生成文本
+ const raw=typeof out==='string'?out:(out&&out[0]&&(out[0].generated_text||out[0].text))||'';
+ // 去掉提示词前缀，只保留模型新生成的部分
+ let genText=raw;
+ if(genText.startsWith(prompt))genText=genText.slice(prompt.length).trim();
+ if(!genText)genText=raw.trim();
  // 流式模拟：分段吐字
- const genText=typeof text==='string'?text:(text&&text[0]&&(text[0].generated_text||text[0].text))||'';
  let full='';
  const step=4;for(let i=0;i<genText.length;i+=step){full+=genText.slice(i,i+step);onDelta(full);await new Promise(r=>setTimeout(r,15))}
  return full;
