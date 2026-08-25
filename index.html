@@ -558,7 +558,8 @@ async function onlineChat(messages,onDelta,llmOverride){
 	 // 兜底：如果 API 地址为空，自动从服务商配置里补上
 	 if(!llm.base){const _p=PROVIDERS.find(x=>x.id===llm.provider);if(_p&&_p.base)llm.base=_p.base;}
  // 如果启用服务器代理，通过本地服务器转发请求（解决 CORS 问题）
- if(store.settings.useProxy){
+ // GitHub Pages 是纯静态托管，没有代理端点，POST 会返回 405，这里强制直连
+ if(store.settings.useProxy&&!/github\.io$/.test(location.hostname)){
   const proxyUrl=(store.settings.proxyUrl||location.origin).replace(/\/+$/,'');
   let res;
   try{res=await fetch(proxyUrl+'/api/proxy/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:llm.base+'/chat/completions',apiKey:llm.apiKey,model:llm.model,messages,temperature:Number(llm.temperature??0.9),maxTokens:1200})});}
