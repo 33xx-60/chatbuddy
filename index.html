@@ -372,9 +372,10 @@ mark{background:rgba(255,200,60,.35);color:inherit;padding:0 2px;border-radius:3
         <div id="onlineFields" class="hidden">
           <label class="field"><span>服务商</span><select id="sProvider"></select><small class="field-tip" id="sProviderTip"></small></label>
           <label class="field"><span>模型</span><select id="sModelSel"></select></label>
+          <label class="field"><span>API 地址（切换服务商自动填好，不用手动改）</span><input id="sBase" placeholder="自动填写"></label>
           <label class="field"><span>API Key</span><input type="password" id="sApiKey" placeholder="sk-..."></label>
-          <label class="field"><span>CORS 代理前缀（可选，遇到跨域错误时填，如 https://corsproxy.io/? ）</span><input id="sProxy" placeholder="留空 = 直连"></label>
           <label class="field"><span>温度</span><input type="range" id="sTemp" min="0" max="1.5" step="0.05" value="0.9"><small><span id="sTempVal">0.9</span></small></label>
+          <label class="field check"><input type="checkbox" id="sUseProxy"><span>🔌 通过本地服务器代理（推荐开启，解决跨域，自动用当前地址）</span></label>
           <button class="btn-plain" id="btnTestLlm">🧪 测试连接</button><span class="test-result" id="testResult"></span>
         </div>
       </div>
@@ -492,13 +493,13 @@ const THEMES=[
 const STYLES=[{id:'romantic',name:'热恋甜腻',prompt:'你说话非常甜腻宠溺，爱撒娇，经常说情话，称呼亲密，温柔黏人。'},{id:'warm',name:'暖心治愈',prompt:'你温柔体贴，善于倾听和安慰，像冬日里的一杯热奶茶。'},{id:'friend',name:'知心朋友',prompt:'你就像认识多年的老友，轻松随意，什么都能聊，自然不做作。'},{id:'buddy',name:'死党损友',prompt:'你是对方的死党损友，爱开玩笑互相调侃，又很讲义气。'},{id:'mentor',name:'人生导师',prompt:'你理性睿智，善于分析给建议，鼓励对方成长。'},{id:'funny',name:'幽默段子手',prompt:'你幽默风趣，擅长讲段子玩梗，总能让对方笑出来。'},{id:'cool',name:'高冷毒舌',prompt:'你话不多高冷傲娇，偶尔毒舌但内心在意，回复简洁却扎心。'},{id:'cute',name:'软萌小可爱',prompt:'你非常可爱软萌，喜欢卖萌撒娇，奶声奶气。'},{id:'custom',name:'完全自定义',prompt:''}];
 const RELS=[{id:'sweetheart',name:'恋人'},{id:'friend',name:'普通朋友'},{id:'buddy',name:'好朋友'},{id:'family',name:'家人'},{id:'mentor',name:'师长'},{id:'custom',name:'自定义'}];
 const PROVIDERS=[
- {id:'groq',name:'🆓 Groq（免费·超快）',base:'https://api.groq.com/openai/v1',model:'llama-3.3-70b-versatile',tip:'完全免费：30次/分钟、1.4万次/天，浏览器直连',models:['llama-3.3-70b-versatile','llama-3.1-8b-instant']},
- {id:'openrouter',name:'🆓 OpenRouter（免费模型）',base:'https://openrouter.ai/api/v1',model:'meta-llama/llama-3.3-70b-instruct:free',tip:'29+ 个 :free 免费模型，免费账号每天 50 次',models:['meta-llama/llama-3.3-70b-instruct:free','deepseek/deepseek-chat-v3-0324:free']},
- {id:'zhipu',name:'🆓 智谱 GLM（Flash 免费）',base:'https://open.bigmodel.cn/api/paas/v4',model:'glm-4.7-flash',tip:'GLM 免费系列。⚠️ 浏览器直连会被 CORS 拦截，需配代理，或用 Groq/OpenRouter 更省事',models:['glm-4.7-flash','glm-4-flash']},
- {id:'siliconflow',name:'🆓 硅基流动（免费额度）',base:'https://api.siliconflow.cn/v1',model:'Qwen/Qwen3-8B',tip:'注册送 2000 万 Token，9B 以下永久免费。⚠️ 需配代理或先用 Groq',models:['Qwen/Qwen3-8B','Qwen/Qwen2.5-7B-Instruct']},
- {id:'deepseek',name:'DeepSeek',base:'https://api.deepseek.com/v1',model:'deepseek-chat',tip:'性价比高。⚠️ 需配 CORS 代理',models:['deepseek-chat']},
- {id:'qwen',name:'通义千问',base:'https://dashscope.aliyuncs.com/compatible-mode/v1',model:'qwen-plus',tip:'新用户送 1000 万 Token。⚠️ 需配 CORS 代理',models:['qwen-plus']},
- {id:'custom',name:'自定义',base:'',model:'',tip:'任意 OpenAI 兼容接口',models:[]}];
+ {id:'zhipu',name:'🆓 智谱 GLM（国内免梯子·免费）',base:'https://open.bigmodel.cn/api/paas/v4',model:'glm-4.7-flash',tip:'国内服务不用梯子，手机号注册即送免费额度。注册：open.bigmodel.cn → 控制台 → API Keys。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:['glm-4.7-flash','glm-4-flash']},
+ {id:'groq',name:'🆓 Groq（免费·超快）',base:'https://api.groq.com/openai/v1',model:'llama-3.3-70b-versatile',tip:'完全免费：30次/分钟、1.4万次/天，浏览器直连。⚠️ 大陆 IP 被墙，需科学上网',models:['llama-3.3-70b-versatile','llama-3.1-8b-instant']},
+ {id:'openrouter',name:'🆓 OpenRouter（免费模型）',base:'https://openrouter.ai/api/v1',model:'meta-llama/llama-3.3-70b-instruct:free',tip:'29+ 个 :free 免费模型，免费账号每天 50 次。⚠️ 大陆访问需科学上网',models:['meta-llama/llama-3.3-70b-instruct:free','deepseek/deepseek-chat-v3-0324:free']},
+ {id:'siliconflow',name:'🆓 硅基流动（免费额度）',base:'https://api.siliconflow.cn/v1',model:'Qwen/Qwen3-8B',tip:'国内服务，注册送 2000 万 Token，9B 以下永久免费。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:['Qwen/Qwen3-8B','Qwen/Qwen2.5-7B-Instruct']},
+ {id:'deepseek',name:'DeepSeek',base:'https://api.deepseek.com/v1',model:'deepseek-chat',tip:'国内服务，性价比高。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:['deepseek-chat']},
+ {id:'qwen',name:'通义千问',base:'https://dashscope.aliyuncs.com/compatible-mode/v1',model:'qwen-plus',tip:'阿里云百炼，新用户送 1000 万 Token。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:['qwen-plus']},
+ {id:'custom',name:'自定义',base:'',model:'',tip:'任意 OpenAI 兼容接口，自己填 API 地址',models:[]}];
 const QUOTES=['今天也要开开心心的呀 ✨','无聊的时候，正是想你的好时候 💭','如果快乐太难，那我祝你平安，顺便想你 🍀','你不在的时候，我把月亮看了好多遍 🌙','天气这么好，适合想我一下下 ☀️','你一来，这里的空气都变甜了 🍬','世界很大，但我的聊天框只留给你 💌','听说发呆是大脑的度假，我陪你去 🏖️'];
 const FALLBACK_IDEAS=['聊聊最近让你开心的小事吧','如果明天完全自由，你想做什么？','最近单曲循环的一首歌是什么？','说一个你想去但还没去的地方','最近有什么想吐槽的吗？','假如我们有超能力，你最想要哪种？'];
 
@@ -530,7 +531,7 @@ function openProfileModal(){
 function loadProfileForm(){const u=getUser();$('#uNickname').value=u.nickname||'';$('#uGender').value=u.gender||'';$('#uSignature').value=u.signature||'';$('#uBirthday').value=u.birthday||'';$('#profileAvatar').innerHTML=u.avatar?`<img src="${u.avatar}" alt="">`:'🙂'}
 function saveProfile(){const u=getUser();u.nickname=$('#uNickname').value.trim();u.gender=$('#uGender').value;u.signature=$('#uSignature').value.trim();u.birthday=$('#uBirthday').value;if(!u.createdAt)u.createdAt=Date.now();store.settings.userName=u.nickname||'我';renderUserCard();renderMessages();save();toast('资料已保存 ✔')}
 function currentCompanion(){return store.companions.find(c=>c.id===currentId)||null}
-function defaultStore(){return{version:2,user:{nickname:'',avatar:'',signature:'',gender:'',birthday:'',createdAt:Date.now()},settings:{userName:'我',engine:'local',llm:{provider:'groq',apiKey:'',model:'llama-3.3-70b-versatile',temperature:0.9,proxy:''},localModel:'onnx-community/Qwen2.5-1.5B-Instruct',theme:{mode:'dark',accent:'#7c6cff',bgStyle:'gradient',bgGradient:'',bgImage:'',fontScale:100,bubbleRadius:16,userBubbleColor:'#7c6cff',aiBubbleColor:'#24243a',showTime:true,animation:true,layout:'sidebar',particles:true,bubbleGlow:true,themeId:''},autoGreet:true,autoGreetInterval:6,tts:true,quickPhrases:['在吗？','今天好无聊啊','陪我聊聊天呗','我给你讲个笑话','想你了','晚安，做个好梦']},companions:[
+function defaultStore(){return{version:2,user:{nickname:'',avatar:'',signature:'',gender:'',birthday:'',createdAt:Date.now()},settings:{userName:'我',engine:'local',llm:{provider:'zhipu',base:'https://open.bigmodel.cn/api/paas/v4',apiKey:'',model:'glm-4.7-flash',temperature:0.9},localModel:'onnx-community/Qwen2.5-0.5B-Instruct',useProxy:true,theme:{mode:'dark',accent:'#7c6cff',bgStyle:'gradient',bgGradient:'',bgImage:'',fontScale:100,bubbleRadius:16,userBubbleColor:'#7c6cff',aiBubbleColor:'#24243a',showTime:true,animation:true,layout:'sidebar',particles:true,bubbleGlow:true,themeId:''},autoGreet:true,autoGreetInterval:6,tts:true,quickPhrases:['在吗？','今天好无聊啊','陪我聊聊天呗','我给你讲个笑话','想你了','晚安，做个好梦']},companions:[
  {id:'x1lu',name:'小鹿',avatar:'🦌',callUser:'小鹿',userCall:'宝贝',relationship:'sweetheart',style:'romantic',systemPrompt:'',color:'#ff6b9d',autoGreet:true,autoInterval:6,messages:[],createdAt:Date.now(),unread:0},
  {id:'x2tie',name:'铁子',avatar:'🐯',callUser:'铁子',userCall:'老铁',relationship:'buddy',style:'buddy',systemPrompt:'',color:'#3ddc97',autoGreet:true,autoInterval:12,messages:[],createdAt:Date.now(),unread:0}
 ]}}
@@ -550,14 +551,28 @@ function buildMessages(c,history,userMessage,auto){
  if(msgs.length>30)return msgs.slice(0,1).concat(msgs.slice(msgs.length-28));
  return msgs;
 }
-async function onlineChat(messages,onDelta){
- const llm=store.settings.llm;
- if(!llm.apiKey)throw new Error('还没填 API Key，去设置里配置');
- const base=(llm.proxy||'')+(llm.base||'').replace(/\/+$/,'');
+async function onlineChat(messages,onDelta,llmOverride){
+	 const llm=llmOverride||store.settings.llm;
+	 if(!llm.apiKey)throw new Error('还没填 API Key，去设置里配置');
+	 // 兜底：如果 API 地址为空，自动从服务商配置里补上
+	 if(!llm.base){const _p=PROVIDERS.find(x=>x.id===llm.provider);if(_p&&_p.base)llm.base=_p.base;}
+ // 如果启用服务器代理，通过本地服务器转发请求（解决 CORS 问题）
+ if(store.settings.useProxy){
+  const proxyUrl=(store.settings.proxyUrl||location.origin).replace(/\/+$/,'');
+  let res;
+  try{res=await fetch(proxyUrl+'/api/proxy/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:llm.base+'/chat/completions',apiKey:llm.apiKey,model:llm.model,messages,temperature:Number(llm.temperature??0.9),maxTokens:1200})});}
+  catch(e){throw new Error('代理连接失败：请确认本地服务器已启动 ('+proxyUrl+')，错误：'+e.message)}
+  if(!res.ok){let t='';try{t=(await res.json()).error||''}catch(e){t=await res.text()}throw new Error('代理返回 '+res.status+'：'+String(t).slice(0,120))}
+  const reader=res.body.getReader(),dec=new TextDecoder();let full='',buf='';
+  while(true){const{done,value}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});const evs=buf.split('\n\n');buf=evs.pop();
+   for(const ev of evs){for(const line of ev.split('\n')){if(!line.startsWith('data:'))continue;const p=line.slice(5).trim();if(p==='[DONE]')continue;let j;try{j=JSON.parse(p)}catch(e){continue}const d=j.choices?.[0]?.delta?.content||j.delta||'';if(d){full+=d;onDelta(d)}}}}
+  return full;
+ }
+ const base=(llm.base||'').replace(/\/+$/,'');
  if(!base)throw new Error('未配置 API 地址');
  let res;
  try{res=await fetch(base+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',...(llm.apiKey?{Authorization:'Bearer '+llm.apiKey}:{})},body:JSON.stringify({model:llm.model,messages,temperature:Number(llm.temperature??0.9),max_tokens:1200,stream:true})});}
- catch(e){throw new Error('网络/跨域(CORS)失败：'+ (llm.proxy?'代理无效或网络问题':'浏览器直连被拦截，请在设置里填 CORS 代理，或改用 Groq/OpenRouter 等支持直连的服务'))}
+ catch(e){throw new Error('网络/跨域(CORS)失败：浏览器直连被拦截，请在设置里勾选「通过本地服务器代理」（推荐开启）')}
  if(!res.ok){let t='';try{t=(await res.json()).error?.message||''}catch(e){t=await res.text()}throw new Error('接口返回 '+res.status+'：'+t.slice(0,120))}
  const reader=res.body.getReader(),dec=new TextDecoder();let full='',buf='';
  while(true){const{done,value}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});const evs=buf.split('\n\n');buf=evs.pop();
@@ -566,19 +581,21 @@ async function onlineChat(messages,onDelta){
 }
 async function getTF(){
  if(window.__tf)return window.__tf;
- // 多个 CDN 备用，国内优先 fastly/gcore，避免单个 CDN 失效
+ // 必须用 ESM 入口：esm.sh 或 jsdelivr 的 /+esm。裸 jsdelivr 会返回 UMD 版，导致 pipeline/env 为 undefined
  const urls=[
+  'https://esm.sh/@huggingface/transformers@3.7.2',
   'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm',
-  'https://fastly.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm',
-  'https://gcore.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm',
-  'https://unpkg.com/@huggingface/transformers@3.7.2/+esm'
+  'https://fastly.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm'
  ];
  let lastErr=null;
  for(const url of urls){
-  try{const mod=await import(url);window.__tf={pipeline:mod.pipeline,env:mod.env};return window.__tf}
-  catch(e){lastErr=e}
+  try{
+   const mod=await import(url);
+   if(!mod||typeof mod.pipeline!=='function'||!mod.env)throw new Error('模块导出缺失');
+   window.__tf={pipeline:mod.pipeline,env:mod.env};return window.__tf;
+  }catch(e){lastErr=e}
  }
- throw lastErr||new Error('load failed');
+ throw lastErr||new Error('Transformers.js 加载失败');
 }
 function buildLocalPrompt(msgs){
  return msgs.map(m=>{
@@ -596,22 +613,26 @@ async function localChat(messages,onDelta){
    const{pipeline,env}=tf;
    env.allowLocalModels=false;
    // 国内镜像优先，失败自动切官方源重试
-   const hosts=['https://hf-mirror.com','https://huggingface.co'];
+   const hosts=[location.origin+'/api/mhf','https://hf-mirror.com','https://huggingface.co'];
    let lastErr=null,loaded=false;
    for(const host of hosts){
     try{
      env.remoteHost=host;
-     localPipe=await pipeline('text-generation',store.settings.localModel,{dtype:'q8',max_length:1024,do_sample:true,temperature:Number(store.settings.llm.temperature??0.9)});
+     // 纯 CPU（WASM）运行，最稳定；不启用 WebGPU（部分环境会卡死或不输出）
+     // 生成参数统一在调用时传入，避免 max_length 与 max_new_tokens 互斥导致不出字
+     localPipe=await pipeline('text-generation',store.settings.localModel,{dtype:'q4f16'});
      loaded=true;break;
-    }catch(e){lastErr=e}
+    }catch(e){lastErr=e;localPipe=null}
    }
    if(!loaded)throw lastErr||new Error('模型下载失败');
   }catch(e){updateLocalStatus('本地模型加载失败');throw new Error('本地模型下载失败（无法连接模型源）：'+(e.message||'网络错误').slice(0,60)+'，请检查网络后刷新，或改用在线 API')}
   finally{localLoading=false}
-  updateLocalStatus('✅ 本地模型已就绪');
+  updateLocalStatus('✅ 本地模型已就绪（CPU 模式）');
  }
  const prompt=buildLocalPrompt(messages);
- const out=await localPipe(prompt,{max_new_tokens:250,do_sample:true,temperature:Number(store.settings.llm.temperature??0.9)});
+ let out;
+ try{out=await localPipe(prompt,{max_new_tokens:150,do_sample:true,temperature:Number(store.settings.llm.temperature??0.9),repetition_penalty:1.1});}
+ catch(e){throw new Error('模型推理失败：'+(e&&e.message?e.message:'未知错误').slice(0,60))}
  // 提取生成文本
  const raw=typeof out==='string'?out:(out&&out[0]&&(out[0].generated_text||out[0].text))||'';
  // 去掉提示词前缀，只保留模型新生成的部分
@@ -625,7 +646,7 @@ async function localChat(messages,onDelta){
  const step=6;for(let i=0;i<genText.length;i+=step){full+=genText.slice(i,i+step);onDelta(full);await new Promise(r=>setTimeout(r,10))}
  return full;
 }
-function updateLocalStatus(s){const el=$('#localModelStatus');if(el)el.textContent=s;$('#engineBadge').textContent=store.settings.engine==='local'?('🧠 '+s):('☁️ 在线API');if(s==='本地模型未加载'){$('#engineBadge').style.cursor='pointer';$('#engineBadge').title='点击去设置免费在线 API（无需下载模型）';const tip=$('.composer-tip');if(tip)tip.textContent='💡 还没配置模型，点底部「🧠 本地模型未加载」设置免费在线 API'}}
+function updateLocalStatus(s){const el=$('#localModelStatus');if(el)el.textContent=s;$('#engineBadge').textContent=store.settings.engine==='local'?'🧠 本地模型':'☁️ 在线API';if(s==='本地模型未加载'){$('#engineBadge').style.cursor='pointer';$('#engineBadge').title='点击去设置免费在线 API（无需下载模型）';const tip=$('.composer-tip');if(tip)tip.textContent='💡 还没配置模型，点底部「🧠 本地模型未加载」设置免费在线 API'}}
 async function genChat({message=null,auto=false}={}){
  const c=currentCompanion();if(!c||sending)return;sending=true;
  $('#btnSend').disabled=true;$('#inputBox').disabled=true;
@@ -803,9 +824,9 @@ function openSettings(tab){
  const s=store.settings,llm=s.llm;
  loadProfileForm();
  setSeg('segEngine',s.engine||'local');$('#onlineFields').classList.toggle('hidden',s.engine!=='online');$('#localModelField').classList.toggle('hidden',s.engine==='online');
- $('#sLocalModel').value=s.localModel||'onnx-community/Qwen2.5-1.5B-Instruct';
- const prov=$('#sProvider');prov.innerHTML=PROVIDERS.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');prov.value=llm.provider||'groq';onProviderChange();
- $('#sApiKey').value=llm.apiKey||'';$('#sProxy').value=llm.proxy||'';$('#sTemp').value=llm.temperature??0.9;$('#sTempVal').textContent=llm.temperature??0.9;
+ $('#sLocalModel').value=s.localModel||'onnx-community/Qwen2.5-0.5B-Instruct';
+ const prov=$('#sProvider');prov.innerHTML=PROVIDERS.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');prov.value=llm.provider||'zhipu';onProviderChange();
+ $('#sApiKey').value=llm.apiKey||'';$('#sBase').value=llm.base||'';$('#sUseProxy').checked=store.settings.useProxy!==false;$('#sTemp').value=llm.temperature??0.9;$('#sTempVal').textContent=llm.temperature??0.9;
  const t=s.theme;$('#tAccent').value=t.accent||'#7c6cff';setSeg('tMode',t.mode||'dark');setSeg('tBgStyle',t.bgStyle||'gradient');setSeg('tLayout',t.layout||'sidebar');
  $('#tBgSolid').value=t.bgSolid||'#12121c';$('#tFontScale').value=t.fontScale||100;$('#tFontVal').textContent=(t.fontScale||100)+'%';$('#tBubbleRadius').value=t.bubbleRadius||16;$('#tRadiusVal').textContent=(t.bubbleRadius||16)+'px';
  $('#tUserBubble').value=t.userBubbleColor||t.accent||'#7c6cff';$('#tAiBubble').value=t.aiBubbleColor||'#24243a';
@@ -815,17 +836,19 @@ function openSettings(tab){
  if(tab)switchTab(tab);$('#settingsModal').classList.remove('hidden');
 }
 function onProviderChange(){
- const p=PROVIDERS.find(x=>x.id===$('#sProvider').value)||PROVIDERS[0];
- $('#sProviderTip').textContent=p.tip||'';
- const sel=$('#sModelSel');sel.innerHTML=p.models.map(m=>`<option value="${m}">${m}</option>`).join('');
- if(!sel.querySelector(`option[value="${CSS.escape(store.settings.llm.model||'')}"]`))sel.value=p.model;
- else sel.value=store.settings.llm.model;
-}
+	 const p=PROVIDERS.find(x=>x.id===$('#sProvider').value)||PROVIDERS[0];
+	 $('#sProviderTip').textContent=p.tip||'';
+	 const sel=$('#sModelSel');sel.innerHTML=p.models.map(m=>`<option value="${m}">${m}</option>`).join('');
+	 if(!sel.querySelector(`option[value="${CSS.escape(store.settings.llm.model||'')}"]`))sel.value=p.model;
+	 else sel.value=store.settings.llm.model;
+	 // 自动填写 API 地址
+	 if(p.base)$('#sBase').value=p.base;
+	}
 function saveSettings(){
  const s=store.settings;
  s.engine=$('#segEngine button.active')?.dataset.v||'local';
  s.localModel=$('#sLocalModel').value;
- const llm=s.llm;llm.provider=$('#sProvider').value;llm.apiKey=$('#sApiKey').value.trim();llm.model=$('#sModelSel').value;llm.temperature=parseFloat($('#sTemp').value);llm.proxy=$('#sProxy').value.trim();
+ const llm=s.llm;const _prov=PROVIDERS.find(x=>x.id===$('#sProvider').value);llm.provider=$('#sProvider').value;llm.base=(_prov&&_prov.base)?_prov.base:$('#sBase').value.trim();llm.apiKey=$('#sApiKey').value.trim();llm.model=$('#sModelSel').value;llm.temperature=parseFloat($('#sTemp').value);s.useProxy=$('#sUseProxy').checked;
  const t=s.theme;t.accent=$('#tAccent').value;t.mode=$('#tMode button.active')?.dataset.v||'dark';t.bgStyle=$('#tBgStyle button.active')?.dataset.v||'gradient';
  const gi=$('#gradientPresets .gradient-chip.active');if(gi)t.bgGradient=GRADIENTS[parseInt(gi.dataset.v)].value;
  t.bgSolid=$('#tBgSolid').value;t.fontScale=parseInt($('#tFontScale').value);t.bubbleRadius=parseInt($('#tBubbleRadius').value);t.userBubbleColor=$('#tUserBubble').value;t.aiBubbleColor=$('#tAiBubble').value;t.showTime=$('#tShowTime').checked;t.animation=$('#tAnimation').checked;t.particles=$('#tParticles').checked;t.bubbleGlow=$('#tBubbleGlow').checked;t.layout=$('#tLayout button.active')?.dataset.v||'sidebar';
@@ -836,8 +859,29 @@ function saveSettings(){
 }
 async function testLlm(){
  const btn=$('#btnTestLlm'),out=$('#testResult');btn.disabled=true;out.className='test-result';out.textContent='测试中…';
- try{const msgs=[{role:'system',content:'你是测试助手'},{role:'user',content:'请只回复四个字：连接成功'}];const r=store.settings.engine==='online'?await onlineChat(msgs,()=>{}):await localChat(msgs,()=>{});out.className='test-result ok';out.textContent='✅ 成功：'+r.replace(/\s+/g,' ').slice(0,40)}
- catch(e){out.className='test-result err';out.textContent='失败：'+e.message.slice(0,80)}finally{btn.disabled=false}
+ // 用界面当前填的值测试（不再依赖已保存的旧配置）
+ const _p=PROVIDERS.find(x=>x.id===$('#sProvider').value);
+ const llmTest={...store.settings.llm,provider:$('#sProvider').value,apiKey:$('#sApiKey').value.trim(),model:$('#sModelSel').value,temperature:parseFloat($('#sTemp').value),base:(_p&&_p.base)?_p.base:$('#sBase').value.trim()};
+ const msgs=[{role:'system',content:'你是测试助手'},{role:'user',content:'请只回复四个字：连接成功'}];
+ const isOnline=!$('#onlineFields').classList.contains('hidden');
+ try{
+  const r=isOnline?await onlineChat(msgs,()=>{},llmTest):await localChat(msgs,()=>{});
+  out.className='test-result ok';out.textContent='✅ 成功：'+r.replace(/\s+/g,' ').slice(0,40);
+ }catch(e){
+  // 在线模型：若因跨域被拦，自动开启本地服务器代理并重试一次
+  if(isOnline&&!/代理/.test(e.message)&&/跨域|CORS|直连|网络/.test(e.message)){
+   out.textContent='直连被拦截，已自动开启代理重试…';
+   store.settings.useProxy=true;const _cb=$('#sUseProxy');if(_cb)_cb.checked=true;
+   try{
+    const r=await onlineChat(msgs,()=>{},llmTest);
+    save();out.className='test-result ok';out.textContent='✅ 成功（已自动开代理）：'+r.replace(/\s+/g,' ').slice(0,40);
+   }catch(e2){
+    out.className='test-result err';out.textContent='失败：'+e2.message.slice(0,80);
+   }
+  }else{
+   out.className='test-result err';out.textContent='失败：'+e.message.slice(0,80);
+  }
+ }finally{btn.disabled=false}
 }
 
 // ================= 搜索 / 导出 =================
