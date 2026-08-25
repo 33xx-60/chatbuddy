@@ -172,6 +172,10 @@ input[type=color]{width:44px;height:34px;border:none;background:none;cursor:poin
 .test-result{font-size:13px;margin-left:10px}
 .test-result.ok{color:var(--ok)}
 .test-result.err{color:var(--danger)}
+.lm-progress{margin-top:8px;display:flex;flex-direction:column;gap:5px}
+.lm-bar{height:8px;border-radius:6px;background:var(--panel);border:1px solid var(--border);overflow:hidden}
+.lm-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#a78bfa);border-radius:6px;transition:width .3s ease}
+.lm-progress-txt{font-size:11px;color:var(--text-faint)}
 .danger-zone{border:1px solid var(--danger);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .danger-title{color:var(--danger);font-size:13px;font-weight:600}
 .idea-list{display:flex;flex-direction:column;gap:8px}
@@ -368,6 +372,7 @@ mark{background:rgba(255,200,60,.35);color:inherit;padding:0 2px;border-radius:3
             <option value="onnx-community/Qwen2.5-3B-Instruct">Qwen2.5-3B（聪明但慢，约2GB）</option>
           </select>
           <small class="field-tip" id="localModelStatus"></small>
+          <div class="lm-progress hidden" id="localModelProgress"><div class="lm-bar"><div class="lm-bar-fill" id="localModelBarFill"></div></div><div class="lm-progress-txt" id="localModelPct">0%</div></div>
         </label>
         <div id="onlineFields" class="hidden">
           <label class="field"><span>服务商</span><select id="sProvider"></select><small class="field-tip" id="sProviderTip"></small></label>
@@ -494,11 +499,11 @@ const STYLES=[{id:'romantic',name:'热恋甜腻',prompt:'你说话非常甜腻�
 const RELS=[{id:'sweetheart',name:'恋人'},{id:'friend',name:'普通朋友'},{id:'buddy',name:'好朋友'},{id:'family',name:'家人'},{id:'mentor',name:'师长'},{id:'custom',name:'自定义'}];
 const PROVIDERS=[
  {id:'zhipu',name:'🆓 智谱 GLM（国内免梯子·免费）',base:'https://open.bigmodel.cn/api/paas/v4',model:'glm-4.7-flash',tip:'国内服务不用梯子，手机号注册即送免费额度。注册：open.bigmodel.cn → 控制台 → API Keys。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:['glm-4.7-flash','glm-4-flash']},
- {id:'groq',name:'🆓 Groq（免费·超快）',base:'https://api.groq.com/openai/v1',model:'llama-3.3-70b-versatile',tip:'完全免费：30次/分钟、1.4万次/天，浏览器直连。⚠️ 大陆 IP 被墙，需科学上网',models:['llama-3.3-70b-versatile','llama-3.1-8b-instant']},
- {id:'openrouter',name:'🆓 OpenRouter（免费模型）',base:'https://openrouter.ai/api/v1',model:'meta-llama/llama-3.3-70b-instruct:free',tip:'29+ 个 :free 免费模型，免费账号每天 50 次。⚠️ 大陆访问需科学上网',models:['meta-llama/llama-3.3-70b-instruct:free','deepseek/deepseek-chat-v3-0324:free']},
  {id:'siliconflow',name:'🆓 硅基流动（免费额度）',base:'https://api.siliconflow.cn/v1',model:'Qwen/Qwen3-8B',tip:'国内服务，注册送 2000 万 Token，9B 以下永久免费。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:['Qwen/Qwen3-8B','Qwen/Qwen2.5-7B-Instruct']},
- {id:'deepseek',name:'DeepSeek',base:'https://api.deepseek.com/v1',model:'deepseek-chat',tip:'国内服务，性价比高。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:['deepseek-chat']},
- {id:'qwen',name:'通义千问',base:'https://dashscope.aliyuncs.com/compatible-mode/v1',model:'qwen-plus',tip:'阿里云百炼，新用户送 1000 万 Token。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:['qwen-plus']},
+ {id:'deepseek',name:'DeepSeek',base:'https://api.deepseek.com/v1',model:'deepseek-chat',tip:'国内服务，性价比高（按量付费，余额不足会报 402，充值即可）。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:['deepseek-chat']},
+ {id:'qwen',name:'通义千问',base:'https://dashscope.aliyuncs.com/compatible-mode/v1',model:'qwen-plus',tip:'阿里云百炼，新用户送 1000 万 Token。⚠️ 部分网络下访问较慢/可能超时',models:['qwen-plus']},
+ {id:'groq',name:'Groq（免费·需梯子）',base:'https://api.groq.com/openai/v1',model:'llama-3.3-70b-versatile',tip:'完全免费且超快，但 ⚠️ 大陆 IP 被墙（403），需科学上网',models:['llama-3.3-70b-versatile','llama-3.1-8b-instant']},
+ {id:'openrouter',name:'OpenRouter（需梯子）',base:'https://openrouter.ai/api/v1',model:'meta-llama/llama-3.3-70b-instruct:free',tip:'29+ 个 :free 免费模型，⚠️ 大陆访问慢/需科学上网',models:['meta-llama/llama-3.3-70b-instruct:free','deepseek/deepseek-chat-v3-0324:free']},
  {id:'custom',name:'自定义',base:'',model:'',tip:'任意 OpenAI 兼容接口，自己填 API 地址',models:[]}];
 const QUOTES=['今天也要开开心心的呀 ✨','无聊的时候，正是想你的好时候 💭','如果快乐太难，那我祝你平安，顺便想你 🍀','你不在的时候，我把月亮看了好多遍 🌙','天气这么好，适合想我一下下 ☀️','你一来，这里的空气都变甜了 🍬','世界很大，但我的聊天框只留给你 💌','听说发呆是大脑的度假，我陪你去 🏖️'];
 const FALLBACK_IDEAS=['聊聊最近让你开心的小事吧','如果明天完全自由，你想做什么？','最近单曲循环的一首歌是什么？','说一个你想去但还没去的地方','最近有什么想吐槽的吗？','假如我们有超能力，你最想要哪种？'];
@@ -552,6 +557,7 @@ function buildMessages(c,history,userMessage,auto){
  if(msgs.length>30)return msgs.slice(0,1).concat(msgs.slice(msgs.length-28));
  return msgs;
 }
+function llmHttpErr(status,t){let hint='';try{const j=JSON.parse(t||'{}');hint=j.error?.message||j.error?.type||''}catch(e){hint=String(t||'').trim()}hint=String(hint||'').slice(0,90);if(status===401)return 'API Key 无效/未授权（HTTP 401），请检查 Key 是否复制完整、是否已过期'+(hint?'；'+hint:'');if(status===402)return '账户余额不足（HTTP 402），按量付费服务（如 DeepSeek）需先充值，充值后即可用'+(hint?'；'+hint:'');if(status===403)return '请求被拒绝（HTTP 403），境外服务（如 Groq）受大陆网络限制，请换国内服务（智谱/硅基流动）'+(hint?'；'+hint:'');if(status===404)return '接口地址或模型名错误（HTTP 404），请检查 API 地址与模型名'+(hint?'；'+hint:'');if(status===429)return '请求太频繁或免费额度用尽（HTTP 429），请稍后再试'+(hint?'；'+hint:'');if(status>=500)return '服务商服务器出错（HTTP '+status+'），请稍后再试'+(hint?'；'+hint:'');return '接口返回 HTTP '+status+(hint?'；'+hint:'')}
 async function onlineChat(messages,onDelta,llmOverride){
 	 const llm=llmOverride||store.settings.llm;
 	 if(!llm.apiKey)throw new Error('还没填 API Key，去设置里配置');
@@ -564,7 +570,7 @@ async function onlineChat(messages,onDelta,llmOverride){
   let res;
   try{res=await fetch(proxyUrl+'/api/proxy/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:llm.base+'/chat/completions',apiKey:llm.apiKey,model:llm.model,messages,temperature:Number(llm.temperature??0.9),maxTokens:1200})});}
   catch(e){throw new Error('代理连接失败：请确认本地服务器已启动 ('+proxyUrl+')，错误：'+e.message)}
-  if(!res.ok){let t='';try{t=await res.text()}catch(e){t=''}let msg=t;try{const j=JSON.parse(t);msg=j.error?.message||j.error||t}catch(e){}throw new Error('代理返回 '+res.status+'：'+String(msg).slice(0,120))}
+  if(!res.ok){let t='';try{t=await res.text()}catch(e){t=''}throw new Error('代理：'+llmHttpErr(res.status,t))}
   const reader=res.body.getReader(),dec=new TextDecoder();let full='',buf='';
   while(true){const{done,value}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});const evs=buf.split('\n\n');buf=evs.pop();
    for(const ev of evs){for(const line of ev.split('\n')){if(!line.startsWith('data:'))continue;const p=line.slice(5).trim();if(p==='[DONE]')continue;let j;try{j=JSON.parse(p)}catch(e){continue}const d=j.choices?.[0]?.delta?.content||j.delta||'';if(d){full+=d;onDelta(d)}}}}
@@ -575,7 +581,7 @@ async function onlineChat(messages,onDelta,llmOverride){
  let res;
  try{res=await fetch(base+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',...(llm.apiKey?{Authorization:'Bearer '+llm.apiKey}:{})},body:JSON.stringify({model:llm.model,messages,temperature:Number(llm.temperature??0.9),max_tokens:1200,stream:true})});}
  catch(e){throw new Error('网络/跨域(CORS)失败：浏览器直连被拦截，请在设置里勾选「通过本地服务器代理」（推荐开启）')}
- if(!res.ok){let t='';try{t=await res.text()}catch(e){t=''}let msg=t;try{const j=JSON.parse(t);msg=j.error?.message||j.error||t}catch(e){}throw new Error('接口返回 '+res.status+'：'+String(msg).slice(0,120))}
+ if(!res.ok){let t='';try{t=await res.text()}catch(e){t=''}throw new Error(llmHttpErr(res.status,t))}
  const reader=res.body.getReader(),dec=new TextDecoder();let full='',buf='';
  while(true){const{done,value}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});const evs=buf.split('\n\n');buf=evs.pop();
   for(const ev of evs){for(const line of ev.split('\n')){if(!line.startsWith('data:'))continue;const p=line.slice(5).trim();if(p==='[DONE]')continue;let j;try{j=JSON.parse(p)}catch(e){continue}const d=j.choices?.[0]?.delta?.content||'';if(d){full+=d;onDelta(d)}}}}
@@ -605,32 +611,51 @@ function buildLocalPrompt(msgs){
   return `${role}：${m.content}`;
  }).join('\n')+'\n助手：';
 }
+function setLocalProgress(text,pct){
+ const st=$('#localModelStatus');if(st)st.textContent=text;
+ const wrap=$('#localModelProgress'),fill=$('#localModelBarFill'),ptxt=$('#localModelPct');
+ if(typeof pct==='number'&&wrap){wrap.classList.remove('hidden');if(fill)fill.style.width=Math.max(0,Math.min(100,pct))+'%';if(ptxt)ptxt.textContent=Math.round(pct)+'%'}
+}
+async function loadLocalModel(){
+ if(localPipe)return localPipe;
+ if(localLoading)throw new Error('模型正在下载/加载中，请稍候再试');
+ localLoading=true;updateLocalStatus('正在下载/加载模型…（首次约 460MB，国内镜像，下面会实时显示进度）');setLocalProgress('准备下载本地模型…',0);
+ try{
+  const tf=await getTF();
+  const{pipeline,env}=tf;
+  env.allowLocalModels=false;
+  env.allowRemoteModels=true;
+  // 国内镜像优先，失败自动切官方源重试
+  const hosts=['https://hf-mirror.com','https://huggingface.co'];
+  let lastErr=null,loaded=false;
+  for(const host of hosts){
+   try{
+    env.remoteHost=host;
+    // 纯 CPU（WASM）运行，最稳定；不启用 WebGPU（部分环境会卡死或不输出）
+    // 生成参数统一在调用时传入，避免 max_length 与 max_new_tokens 互斥导致不出字
+    localPipe=await pipeline('text-generation',store.settings.localModel,{
+     dtype:'q4f16',
+     progress_callback:(p)=>{
+      if(p.status==='progress'&&p.file){const f=String(p.file).split('/').pop();const pc=typeof p.progress==='number'?p.progress:0;const done=((p.loaded||0)/1048576).toFixed(0),tot=((p.total||0)/1048576).toFixed(0);setLocalProgress('下载中 '+f+'：'+done+'MB / '+tot+'MB '+Math.round(pc)+'%',pc)}
+      else if(p.status==='initiate'){setLocalProgress('正在连接模型源，准备下载 '+(p.file?String(p.file).split('/').pop():'模型')+'…',0)}
+      else if(p.status==='done'){setLocalProgress('文件下载完成，正在编译模型进内存…',100)}
+     }
+    });
+    loaded=true;break;
+   }catch(e){lastErr=e;localPipe=null}
+  }
+  if(!loaded)throw lastErr||new Error('模型下载失败');
+ }catch(e){
+  updateLocalStatus('本地模型加载失败');setLocalProgress('❌ 本地模型加载失败：'+(e&&e.message?e.message:'未知错误').slice(0,60),0);
+  throw new Error('本地模型加载失败：'+(e&&e.message?e.message:'未知错误').slice(0,140)+'。可改用在线 API（更稳定）');
+ }finally{localLoading=false}
+ updateLocalStatus('✅ 本地模型已就绪（CPU 模式）');setLocalProgress('✅ 已下载完成，模型已就绪',100);
+ return localPipe;
+}
+let preloadTimer=null;
+function preloadLocalModel(){if(store.settings.engine!=='local'||localPipe)return;clearTimeout(preloadTimer);preloadTimer=setTimeout(()=>{loadLocalModel().catch(()=>{})},300)}
 async function localChat(messages,onDelta){
- let tf;
- try{tf=await getTF()}catch(e){throw new Error('Transformers.js 加载失败（CDN 连不上），请检查网络后刷新页面，或改用在线 API')}
- if(!localPipe){
-  if(localLoading)throw new Error('模型正在下载/加载中，请稍候再试');
-  localLoading=true;updateLocalStatus('正在下载/加载模型…（首次约 500MB，之后走缓存，请耐心等待）');
-  try{
-   const{pipeline,env}=tf;
-   env.allowLocalModels=false;
-   // 国内镜像优先，失败自动切官方源重试
-   const hosts=['https://hf-mirror.com','https://huggingface.co'];
-   let lastErr=null,loaded=false;
-   for(const host of hosts){
-    try{
-     env.remoteHost=host;
-     // 纯 CPU（WASM）运行，最稳定；不启用 WebGPU（部分环境会卡死或不输出）
-     // 生成参数统一在调用时传入，避免 max_length 与 max_new_tokens 互斥导致不出字
-     localPipe=await pipeline('text-generation',store.settings.localModel,{dtype:'q4f16'});
-     loaded=true;break;
-    }catch(e){lastErr=e;localPipe=null}
-   }
-   if(!loaded)throw lastErr||new Error('模型下载失败');
-  }catch(e){updateLocalStatus('本地模型加载失败');throw new Error('本地模型下载失败（无法连接模型源）：'+(e.message||'网络错误').slice(0,60)+'，请检查网络后刷新，或改用在线 API')}
-  finally{localLoading=false}
-  updateLocalStatus('✅ 本地模型已就绪（CPU 模式）');
- }
+ await loadLocalModel();
  const prompt=buildLocalPrompt(messages);
  let out;
  try{out=await localPipe(prompt,{max_new_tokens:150,do_sample:true,temperature:Number(store.settings.llm.temperature??0.9),repetition_penalty:1.1});}
@@ -835,6 +860,7 @@ function openSettings(tab){
  $('#tShowTime').checked=t.showTime!==false;$('#tAnimation').checked=t.animation!==false;$('#tParticles').checked=t.particles!==false;$('#tBubbleGlow').checked=t.bubbleGlow!==false;
  $('#sAutoGreet').checked=s.autoGreet!==false;$('#sAutoInterval').value=s.autoGreetInterval||6;$('#sTts').checked=s.tts!==false;
  updateLocalStatus(localPipe?'✅ 本地模型已就绪':'本地模型未加载');
+ if(s.engine==='local'&&!localPipe)preloadLocalModel();
  if(tab)switchTab(tab);$('#settingsModal').classList.remove('hidden');
 }
 function onProviderChange(){
@@ -966,7 +992,8 @@ function bindEvents(){
  $('#closeSettings').addEventListener('click',()=>$('#settingsModal').classList.add('hidden'));
  $('#saveSettingsBtn').addEventListener('click',saveSettings);
  $$('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
- $$('#segEngine button').forEach(b=>b.addEventListener('click',()=>{setSeg('segEngine',b.dataset.v);store.settings.engine=b.dataset.v;$('#onlineFields').classList.toggle('hidden',b.dataset.v!=='online');$('#localModelField').classList.toggle('hidden',b.dataset.v==='online');save()}));
+ $$('#segEngine button').forEach(b=>b.addEventListener('click',()=>{setSeg('segEngine',b.dataset.v);store.settings.engine=b.dataset.v;$('#onlineFields').classList.toggle('hidden',b.dataset.v!=='online');$('#localModelField').classList.toggle('hidden',b.dataset.v==='online');if(b.dataset.v==='local')preloadLocalModel();save()}));
+ $('#sLocalModel').addEventListener('change',()=>{if(localLoading){toast('模型正在下载/加载中，稍候再切换');$('#sLocalModel').value=store.settings.localModel||'onnx-community/Qwen2.5-0.5B-Instruct';return}const v=$('#sLocalModel').value;if(v!==store.settings.localModel){store.settings.localModel=v;localPipe=null;setLocalProgress('模型已切换，即将重新下载',0)}save();preloadLocalModel()});
  $('#sProvider').addEventListener('change',onProviderChange);
  $('#sTemp').addEventListener('input',()=>$('#sTempVal').textContent=$('#sTemp').value);
  $('#btnTestLlm').addEventListener('click',testLlm);
