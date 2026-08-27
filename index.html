@@ -196,7 +196,22 @@ input[type=color]{width:44px;height:34px;border:none;background:none;cursor:poin
 .search-item .s-content{font-size:13px;line-height:1.6}
 mark{background:rgba(255,200,60,.35);color:inherit;padding:0 2px;border-radius:3px}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--panel-solid);color:var(--text);padding:12px 22px;border-radius:30px;box-shadow:var(--shadow);border:1px solid var(--border);font-size:14px;z-index:200}
-@media(max-width:768px){#sidebar{width:220px}.message-area,.composer{padding-left:14px;padding-right:14px}.msg-body{max-width:82%}}
+.menu-btn{display:none}
+.mobile-overlay{display:none}
+@media(max-width:768px){
+ #sidebar{position:fixed;left:0;top:0;bottom:0;width:min(82vw,300px);z-index:60;transform:translateX(-105%);transition:transform .28s ease;box-shadow:var(--shadow)}
+ body.nav-open #sidebar{transform:translateX(0)}
+ .mobile-overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:55;opacity:0;pointer-events:none;transition:opacity .28s ease}
+ body.nav-open .mobile-overlay{opacity:1;pointer-events:auto}
+ .menu-btn{display:inline-flex}
+ .message-area,.composer{padding-left:10px;padding-right:10px}
+ .msg-body{max-width:86%}
+ .chat-header{padding:10px 12px}
+ .chat-header-actions .icon-btn span{display:none}
+ .chat-header-actions .icon-btn{padding:8px 8px}
+ .chat-header-left>div:last-child{min-width:0;overflow:hidden}
+ .chat-header-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
 </style>
 <style>
 /* ===== 登录页面 ===== */
@@ -279,6 +294,7 @@ mark{background:rgba(255,200,60,.35);color:inherit;padding:0 2px;border-radius:3
     <div id="chatView" class="chat-view hidden">
       <header class="chat-header">
         <div class="chat-header-left">
+          <button class="icon-btn menu-btn" id="btnMenu">☰</button>
           <div class="avatar" id="headerAvatar">🦌</div>
           <div><div class="chat-header-name"><span id="headerName">小鹿</span><span class="status-tag">在线</span></div>
           <div class="chat-header-sub" id="headerSub"></div></div>
@@ -304,6 +320,7 @@ mark{background:rgba(255,200,60,.35);color:inherit;padding:0 2px;border-radius:3
     </div>
   </main>
 </div>
+<div class="mobile-overlay" id="mobileOverlay"></div>
 
 <!-- 伙伴弹窗 -->
 <div class="modal-mask hidden" id="companionModal">
@@ -555,6 +572,7 @@ function buildMessages(c,history,userMessage,auto){
  const lines=[`你是「${c.name}」，一个活泼的 AI 聊天伙伴，正在和用户聊天。`,`你和用户的关系：${rel.name}。`,`你对用户的称呼是「${c.userCall||'你'}」，用户对你的称呼是「${c.callUser||c.name}」，聊天时要自然使用这些称呼。`];
  lines.push(c.style==='custom'?`你的角色设定（用户自定义）：${c.systemPrompt||'由你自己发挥，保持自然有趣'}`:`你的聊天风格：${style.prompt}`);
  lines.push('你拥有完整聊天记忆，可以查看历史对话自然延续话题。回复要口语化、有感情、像真人，不要像客服。');
+ lines.push('【回复格式】聊日常、生活、情感这类非专业话题时，要像真人聊天一样自然随意：不要用序号、编号、分点列举，不要堆加粗小标题或长篇框架，更不要一条条列出来，一句话接一句话地说就行；只有对方明确要步骤、清单或专业讲解时，才可以用简洁的要点。');
  lines.push('【回复多样性铁律】每次回复都要和上一条明显不同：变换句式、语气、长短和情绪，绝不机械重复同样的开场白、口头禅或万能套话（严禁使用"好的""没问题""收到""明白了"这类单一回复）；要结合对方刚说的话自然回应，可以偶尔反问、分享趣事、撒娇或开个小玩笑，让每一次对话都像真人聊天一样有新鲜感。');
  const msgs=[{role:'system',content:lines.join('\n')}];
  for(const m of(history||[])){if(m&&m.role&&m.content)msgs.push({role:m.role==='user'?'user':'assistant',content:String(m.content).slice(0,1200)})}
@@ -744,7 +762,7 @@ function appendMessage(role,content,{auto=false,ts=Date.now()}={}){
  scrollBottom();return msg;
 }
 function scrollBottom(){requestAnimationFrame(()=>{$('#messageArea').scrollTop=$('#messageArea').scrollHeight})}
-function switchTo(id){const c=store.companions.find(x=>x.id===id);if(!c)return;currentId=id;c.unread=0;$('#emptyState').classList.add('hidden');$('#chatView').classList.remove('hidden');$('#headerName').textContent=c.name;$('#headerSub').textContent=(STYLES.find(s=>s.id===c.style)?.name||'')+(c.autoGreet?' · TA 会主动找你':'');$('#headerAvatar').innerHTML=avatarHtml(c);$('#headerAvatar').style.boxShadow=`inset 0 0 0 2px ${c.color}`;renderMessages();renderCompanionList();save()}
+function switchTo(id){const c=store.companions.find(x=>x.id===id);if(!c)return;currentId=id;c.unread=0;document.body.classList.remove('nav-open');$('#emptyState').classList.add('hidden');$('#chatView').classList.remove('hidden');$('#headerName').textContent=c.name;$('#headerSub').textContent=(STYLES.find(s=>s.id===c.style)?.name||'')+(c.autoGreet?' · TA 会主动找你':'');$('#headerAvatar').innerHTML=avatarHtml(c);$('#headerAvatar').style.boxShadow=`inset 0 0 0 2px ${c.color}`;renderMessages();renderCompanionList();save()}
 function showEmptyState(){$('#chatView').classList.add('hidden');$('#emptyState').classList.remove('hidden')}
 
 // ================= 主题 =================
@@ -977,6 +995,8 @@ function bindEvents(){
  $('#btnNewCompanion').addEventListener('click',()=>openCompanionModal(null));
  $('#btnEmptyCreate').addEventListener('click',()=>openCompanionModal(null));
  $('#btnGlobalSettings').addEventListener('click',()=>openSettings());
+ $('#btnMenu').addEventListener('click',()=>document.body.classList.toggle('nav-open'));
+ $('#mobileOverlay').addEventListener('click',()=>document.body.classList.remove('nav-open'));
  $('#userCard').addEventListener('click',openProfileModal);
  $('#closeProfile').addEventListener('click',()=>$('#profileModal').classList.add('hidden'));
  $('#btnEditProfile').addEventListener('click',()=>{$('#profileModal').classList.add('hidden');openSettings('tabProfile')});
