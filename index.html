@@ -399,7 +399,7 @@ mark{background:rgba(255,200,60,.35);color:inherit;padding:0 2px;border-radius:3
         </label>
         <div id="onlineFields" class="hidden">
           <label class="field"><span>服务商</span><select id="sProvider"></select><small class="field-tip" id="sProviderTip"></small></label>
-          <label class="field"><span>模型</span><select id="sModelSel"></select></label>
+          <label class="field"><span>模型</span><select id="sModelSel"></select><small class="field-tip" id="sModelNote"></small></label>
           <label class="field"><span>API 地址（切换服务商自动填好，不用手动改）</span><input id="sBase" placeholder="自动填写"></label>
           <label class="field"><span>API Key</span><input type="password" id="sApiKey" placeholder="sk-..."></label>
           <label class="field"><span>温度</span><input type="range" id="sTemp" min="0" max="1.5" step="0.05" value="0.9"><small><span id="sTempVal">0.9</span></small></label>
@@ -521,12 +521,12 @@ const THEMES=[
 const STYLES=[{id:'romantic',name:'热恋甜腻',prompt:'你说话非常甜腻宠溺，爱撒娇，经常说情话，称呼亲密，温柔黏人。'},{id:'warm',name:'暖心治愈',prompt:'你温柔体贴，善于倾听和安慰，像冬日里的一杯热奶茶。'},{id:'friend',name:'知心朋友',prompt:'你就像认识多年的老友，轻松随意，什么都能聊，自然不做作。'},{id:'buddy',name:'死党损友',prompt:'你是对方的死党损友，爱开玩笑互相调侃，又很讲义气。'},{id:'mentor',name:'人生导师',prompt:'你理性睿智，善于分析给建议，鼓励对方成长。'},{id:'funny',name:'幽默段子手',prompt:'你幽默风趣，擅长讲段子玩梗，总能让对方笑出来。'},{id:'cool',name:'高冷毒舌',prompt:'你话不多高冷傲娇，偶尔毒舌但内心在意，回复简洁却扎心。'},{id:'cute',name:'软萌小可爱',prompt:'你非常可爱软萌，喜欢卖萌撒娇，奶声奶气。'},{id:'custom',name:'完全自定义',prompt:''}];
 const RELS=[{id:'sweetheart',name:'恋人'},{id:'friend',name:'普通朋友'},{id:'buddy',name:'好朋友'},{id:'family',name:'家人'},{id:'mentor',name:'师长'},{id:'custom',name:'自定义'}];
 const PROVIDERS=[
- {id:'zhipu',name:'🆓 智谱 GLM（国内免梯子·免费）',base:'https://open.bigmodel.cn/api/paas/v4',model:'glm-4.7-flash',tip:'国内服务不用梯子，手机号注册即送免费额度。注册：open.bigmodel.cn → 控制台 → API Keys。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:['glm-4.7-flash','glm-4-flash']},
- {id:'siliconflow',name:'🆓 硅基流动（免费额度）',base:'https://api.siliconflow.cn/v1',model:'Qwen/Qwen3-8B',tip:'国内服务，注册送 2000 万 Token，9B 以下永久免费。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:['Qwen/Qwen3-8B','Qwen/Qwen2.5-7B-Instruct']},
- {id:'deepseek',name:'DeepSeek',base:'https://api.deepseek.com/v1',model:'deepseek-chat',tip:'国内服务，性价比高（按量付费，余额不足会报 402，充值即可）。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:['deepseek-chat']},
- {id:'qwen',name:'通义千问',base:'https://dashscope.aliyuncs.com/compatible-mode/v1',model:'qwen-plus',tip:'阿里云百炼，新用户送 1000 万 Token。⚠️ 部分网络下访问较慢/可能超时',models:['qwen-plus']},
- {id:'groq',name:'Groq（免费·需梯子）',base:'https://api.groq.com/openai/v1',model:'llama-3.3-70b-versatile',tip:'完全免费且超快，但 ⚠️ 大陆 IP 被墙（403），需科学上网',models:['llama-3.3-70b-versatile','llama-3.1-8b-instant']},
- {id:'openrouter',name:'OpenRouter（需梯子）',base:'https://openrouter.ai/api/v1',model:'meta-llama/llama-3.3-70b-instruct:free',tip:'29+ 个 :free 免费模型，⚠️ 大陆访问慢/需科学上网',models:['meta-llama/llama-3.3-70b-instruct:free','deepseek/deepseek-chat-v3-0324:free']},
+ {id:'zhipu',name:'🆓 智谱 GLM（国内免梯子·免费）',base:'https://open.bigmodel.cn/api/paas/v4',model:'glm-4.7-flash',tip:'国内服务不用梯子，手机号注册即送免费额度。注册：open.bigmodel.cn → 控制台 → API Keys。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:[{v:'glm-4.7-flash',label:'GLM-4.7-Flash',note:'🆓 免费 · 推荐（200K 上下文，主力免费模型）'},{v:'glm-4-flash',label:'GLM-4-Flash',note:'🆓 免费 · 轻量（128K）'},{v:'glm-4.5',label:'GLM-4.5',note:'💰 付费 · 更强更聪明'}]},
+ {id:'siliconflow',name:'🆓 硅基流动（免费额度）',base:'https://api.siliconflow.cn/v1',model:'Qwen/Qwen3-8B',tip:'国内服务，注册送 2000 万 Token，9B 以下永久免费。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:[{v:'Qwen/Qwen3-8B',label:'Qwen3-8B',note:'🆓 免费 · 永久'},{v:'Qwen/Qwen2.5-7B-Instruct',label:'Qwen2.5-7B-Instruct',note:'🆓 免费 · 永久'},{v:'Qwen/Qwen3-32B',label:'Qwen3-32B',note:'💰 付费 · 更强'}]},
+ {id:'deepseek',name:'DeepSeek',base:'https://api.deepseek.com/v1',model:'deepseek-chat',tip:'国内服务，性价比高（按量付费，余额不足会报 402，充值即可）。若浏览器直连被拦，勾选下方「通过本地服务器代理」',models:[{v:'deepseek-chat',label:'DeepSeek-V3（chat）',note:'💰 付费 · 通用对话，性价比高'},{v:'deepseek-reasoner',label:'DeepSeek-R1（reasoner）',note:'💰 付费 · 深度推理，慢但强'},{v:'deepseek-v4-flash',label:'DeepSeek-V4-Flash',note:'💰 付费 · 最新轻量，快且便宜'}]},
+ {id:'qwen',name:'通义千问',base:'https://dashscope.aliyuncs.com/compatible-mode/v1',model:'qwen-plus',tip:'阿里云百炼，新用户送 1000 万 Token。⚠️ 部分网络下访问较慢/可能超时',models:[{v:'qwen-plus',label:'Qwen-Plus',note:'💰 付费 · 均衡通用（新用户送 1000 万 Token）'},{v:'qwen-flash',label:'Qwen-Flash',note:'💰 低价 · 速度快'},{v:'qwen-max',label:'Qwen-Max',note:'💰 付费 · 旗舰最强'}]},
+ {id:'groq',name:'Groq（免费·需梯子）',base:'https://api.groq.com/openai/v1',model:'llama-3.3-70b-versatile',tip:'完全免费且超快，但 ⚠️ 大陆 IP 被墙（403），需科学上网',models:[{v:'llama-3.3-70b-versatile',label:'Llama 3.3 70B',note:'🆓 免费 · 强而快'},{v:'llama-3.1-8b-instant',label:'Llama 3.1 8B',note:'🆓 免费 · 极速'}]},
+ {id:'openrouter',name:'OpenRouter（需梯子）',base:'https://openrouter.ai/api/v1',model:'meta-llama/llama-3.3-70b-instruct:free',tip:'29+ 个 :free 免费模型，⚠️ 大陆访问慢/需科学上网',models:[{v:'meta-llama/llama-3.3-70b-instruct:free',label:'Llama 3.3 70B (free)',note:'🆓 免费'},{v:'deepseek/deepseek-chat-v3-0324:free',label:'DeepSeek V3 (free)',note:'🆓 免费'}]},
  {id:'custom',name:'自定义',base:'',model:'',tip:'任意 OpenAI 兼容接口，自己填 API 地址',models:[]}];
 const QUOTES=['今天也要开开心心的呀 ✨','无聊的时候，正是想你的好时候 💭','如果快乐太难，那我祝你平安，顺便想你 🍀','你不在的时候，我把月亮看了好多遍 🌙','天气这么好，适合想我一下下 ☀️','你一来，这里的空气都变甜了 🍬','世界很大，但我的聊天框只留给你 💌','听说发呆是大脑的度假，我陪你去 🏖️'];
 const FALLBACK_IDEAS=['聊聊最近让你开心的小事吧','如果明天完全自由，你想做什么？','最近单曲循环的一首歌是什么？','说一个你想去但还没去的地方','最近有什么想吐槽的吗？','假如我们有超能力，你最想要哪种？'];
@@ -891,14 +891,15 @@ function openSettings(tab){
  if(s.engine==='local'&&!localPipe)preloadLocalModel();
  if(tab)switchTab(tab);$('#settingsModal').classList.remove('hidden');
 }
+function updateModelNote(){const p=PROVIDERS.find(x=>x.id===$('#sProvider').value);const m=(p&&p.models.find(x=>x.v===$('#sModelSel').value))||(p&&p.models[0]);const el=$('#sModelNote');if(el)el.textContent=m?m.note:'';}
 function onProviderChange(){
 	 const p=PROVIDERS.find(x=>x.id===$('#sProvider').value)||PROVIDERS[0];
 	 $('#sProviderTip').textContent=p.tip||'';
-	 const sel=$('#sModelSel');sel.innerHTML=p.models.map(m=>`<option value="${m}">${m}</option>`).join('');
+	 const sel=$('#sModelSel');sel.innerHTML=p.models.map(m=>`<option value="${m.v}">${m.label||m.v}</option>`).join('');
 	 if(!sel.querySelector(`option[value="${CSS.escape(store.settings.llm.model||'')}"]`))sel.value=p.model;
 	 else sel.value=store.settings.llm.model;
 	 // 自动填写 API 地址
-	 if(p.base)$('#sBase').value=p.base;
+	 updateModelNote(); if(p.base)$('#sBase').value=p.base;
 	}
 function saveSettings(){
  const s=store.settings;
@@ -1025,6 +1026,7 @@ function bindEvents(){
  $$('#segEngine button').forEach(b=>b.addEventListener('click',()=>{setSeg('segEngine',b.dataset.v);store.settings.engine=b.dataset.v;$('#onlineFields').classList.toggle('hidden',b.dataset.v!=='online');$('#localModelField').classList.toggle('hidden',b.dataset.v==='online');if(b.dataset.v==='local')preloadLocalModel();save()}));
  $('#sLocalModel').addEventListener('change',()=>{if(localLoading){toast('模型正在下载/加载中，稍候再切换');$('#sLocalModel').value=store.settings.localModel||'onnx-community/Qwen2.5-0.5B-Instruct';return}const v=$('#sLocalModel').value;if(v!==store.settings.localModel){store.settings.localModel=v;localPipe=null;setLocalProgress('模型已切换，即将重新下载',0)}save();preloadLocalModel()});
  $('#sProvider').addEventListener('change',onProviderChange);
+ $('#sModelSel').addEventListener('change',updateModelNote);
  $('#sTemp').addEventListener('input',()=>$('#sTempVal').textContent=$('#sTemp').value);
  $('#btnTestLlm').addEventListener('click',testLlm);
  $('#tAccent').addEventListener('input',()=>{store.settings.theme.accent=$('#tAccent').value;applyTheme(store.settings.theme)});
