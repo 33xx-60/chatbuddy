@@ -103,7 +103,13 @@ button{font-family:inherit}
 [data-glow="1"] .msg.user .bubble{box-shadow:0 0 14px var(--accent-soft),0 0 26px rgba(124,108,255,.16)}
 .msg-meta{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--text-faint)}
 .auto-tag{background:var(--accent-soft);color:var(--accent);padding:1px 8px;border-radius:10px;font-size:10px}
-.stream-cursor::after{content:"▍";animation:blink 1s infinite;color:var(--accent)}
+.stream-cursor::after{content:"";display:inline-block;width:2px;height:1em;margin-left:2px;vertical-align:-2px;background:var(--accent);border-radius:1px;animation:blink 1s infinite}
+.thk{display:inline-flex;align-items:center;gap:5px;color:var(--text-faint);font-size:12.5px;min-height:22px}
+.thk-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:thkBounce 1.2s infinite ease-in-out}
+.thk-dot:nth-child(2){animation-delay:.18s}
+.thk-dot:nth-child(3){animation-delay:.36s}
+.thk-txt{opacity:.75}
+@keyframes thkBounce{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-4px);opacity:1}}
 @keyframes blink{50%{opacity:0}}
 .typing-hint{font-size:12px;color:var(--accent)}
 .typing-dots::after{content:"";animation:dots 1.4s infinite}
@@ -646,8 +652,12 @@ async function loadLocalModel(){
   }
   if(!loaded)throw lastErr||new Error('模型下载失败');
  }catch(e){
-  updateLocalStatus('本地模型加载失败');setLocalProgress('❌ 本地模型加载失败：'+(e&&e.message?e.message:'未知错误').slice(0,60),0);
-  throw new Error('本地模型加载失败：'+(e&&e.message?e.message:'未知错误').slice(0,140)+'。可改用在线 API（更稳定）');
+  const raw=(e&&e.message?e.message:'未知错误');
+  console.error('[本地模型] 加载失败详情：',e);
+  const cors=/CORS|cross-origin|Failed to fetch|NetworkError|load failed|fetch/i.test(raw);
+  const hint=cors?'浏览器跨域限制，在线版无法直连模型镜像。本地大模型请改用「本地服务器版」：运行 node server.js 后访问本地地址':raw.slice(0,110);
+  updateLocalStatus('本地模型加载失败');setLocalProgress('❌ '+hint.slice(0,80),0);
+  throw new Error('本地模型加载失败：'+hint+'。也可改用在线 API（更稳定）');
  }finally{localLoading=false}
  updateLocalStatus('✅ 本地模型已就绪（CPU 模式）');setLocalProgress('✅ 已下载完成，模型已就绪',100);
  return localPipe;
@@ -685,12 +695,12 @@ async function genChat({message=null,auto=false}={}){
  const lastDiv=area.querySelector('.date-divider:last-child');
  if(!lastDiv||!lastDiv.textContent.includes(date))area.insertAdjacentHTML('beforeend',`<div class="date-divider"><span>${date}</span></div>`);
  const tid=uid();
- area.insertAdjacentHTML('beforeend',`<div class="msg ai" data-id="${tid}"><div class="avatar" style="box-shadow:inset 0 0 0 2px ${c.color}">${avatarHtml(c)}</div><div class="msg-body"><div class="msg-name">${esc(c.callUser||c.name)}</div><div class="bubble stream-cursor"></div><div class="msg-meta"><span class="auto-tag" style="display:${auto?'':'none'}">TA 主动找你</span></div></div></div>`);
+ area.insertAdjacentHTML('beforeend',`<div class="msg ai" data-id="${tid}"><div class="avatar" style="box-shadow:inset 0 0 0 2px ${c.color}">${avatarHtml(c)}</div><div class="msg-body"><div class="msg-name">${esc(c.callUser||c.name)}</div><div class="bubble"><span class="thk"><span class="thk-dot"></span><span class="thk-dot"></span><span class="thk-dot"></span><span class="thk-txt">正在思考</span></span></div><div class="msg-meta"><span class="auto-tag" style="display:${auto?'':'none'}">TA 主动找你</span></div></div></div>`);
  const tempEl=area.querySelector(`[data-id="${tid}"]`),bubbleEl=tempEl.querySelector('.bubble');
- let full='';
+ let full='',started=false;
  try{
   const chatFn=store.settings.engine==='online'?onlineChat:localChat;
-  full=await chatFn(msgs,(d)=>{bubbleEl.textContent=full+d;scrollBottom()});
+  full=await chatFn(msgs,(d)=>{if(!started){started=true;bubbleEl.classList.add('stream-cursor')}bubbleEl.textContent=full+d;scrollBottom()});
  }catch(e){
   tempEl.remove();toast('出错：'+e.message.slice(0,90));
   if(/API Key|填/.test(e.message))openSettings('tabEngine');
