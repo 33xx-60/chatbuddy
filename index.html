@@ -319,8 +319,8 @@ mark{background:rgba(255,200,60,.35);color:inherit;padding:0 2px;border-radius:3
       </div>
     </div>
   </main>
+  <div class="mobile-overlay" id="mobileOverlay"></div>
 </div>
-<div class="mobile-overlay" id="mobileOverlay"></div>
 
 <!-- 伙伴弹窗 -->
 <div class="modal-mask hidden" id="companionModal">
@@ -845,6 +845,7 @@ function renderIdeas(ideas){$('#ideaLoading').classList.add('hidden');$('#ideaLi
 
 // ================= 伙伴 CRUD =================
 function openCompanionModal(id){
+ document.body.classList.remove('nav-open');
  const c=id?store.companions.find(x=>x.id===id):null;editingId=id||null;pendingAvatarImage=null;
  $('#companionModalTitle').textContent=c?'编辑聊天伙伴':'新建聊天伙伴';
  $('#fName').value=c?c.name:'';$('#fCallUser').value=c?c.callUser:'';$('#fUserCall').value=c?c.userCall:'';
